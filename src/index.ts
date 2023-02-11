@@ -1,3 +1,3 @@
-import { text } from './test';
+import text from './test';
 
 console.log(text);
