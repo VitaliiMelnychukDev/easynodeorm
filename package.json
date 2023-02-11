@@ -1,0 +1,29 @@
+{
+  "name": "easynodeorm",
+  "version": "0.0.1",
+  "description": "ORM for node projects",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node src/index.ts",
+    "build": "tsc",
+    "clean": "rm -rf ./lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VitaliiMelnychukDev/easynodeorm.git"
+  },
+  "keywords": [
+    "orm",
+    "node"
+  ],
+  "author": "Vitalii Melnychuk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/VitaliiMelnychukDev/easynodeorm/issues"
+  },
+  "homepage": "https://github.com/VitaliiMelnychukDev/easynodeorm#readme",
+  "devDependencies": {
+    "ts-node": "^10.9.1"
+  }
+}
