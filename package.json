@@ -4,7 +4,8 @@
   "description": "ORM for node projects",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "ts-node src/test/index.ts",
+    "start:dev": "nodemon src/test/index.ts",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\" --fix",
@@ -35,8 +36,13 @@
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.3",
+    "nodemon": "^2.0.20",
+    "pg": "^8.9.0",
     "prettier": "^2.8.4",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "node-cache": "^5.1.2"
   }
 }
