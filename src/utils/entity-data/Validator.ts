@@ -1,51 +1,25 @@
-import {
-  ColumnDataToHandel,
-  EntityData,
-  EntityDataToHandle,
-} from '../../types/decorators/entity';
+import { EntityData } from '../../types/entity-data/entity';
 import WrongEntityError from '../../error/WrongEntityError';
-import { PropertyDecoratorTarget } from '../../types/decorators/decorator';
 import WrongPropertyError from '../../error/WrongPropertyError';
-import ObjectHelper from '../ObjectHelper';
-import { isDecoratorData } from '../../types/decorators/validation';
+import ObjectHelper from '../../helpers/ObjectHelper';
+import { isDecoratorData } from '../../types/entity-data/validation';
 import { MessageCode } from '../../consts/message';
-import { ObjectWithPropertyTypesStringArray } from '../../types/object';
+import {
+  ObjectType,
+  ObjectWithPropertyTypesStringArray,
+} from '../../types/object';
+import { EntityDataStore } from './index';
 
-class EntityDataGetter {
-  private readonly entity: PropertyDecoratorTarget;
+class Validator {
+  private readonly entity: ObjectType;
   private readonly entityData: EntityData;
   private readonly entityClassName: string;
   private readonly propertyValidationErrors: ObjectWithPropertyTypesStringArray =
     {};
-  constructor(entity: unknown) {
-    if (typeof entity !== 'object') {
-      throw new WrongEntityError('Wrong Entity Type Provided');
-    }
-    this.entityData = EntityDataGetter.getEntityDataOrThrowError(entity);
+  constructor(entity: ObjectType) {
+    this.entityData = EntityDataStore.getEntityDataOrThrowError(entity);
     this.entity = entity;
     this.entityClassName = entity.constructor.name;
-  }
-
-  validateAndGetEntityData(): EntityDataToHandle {
-    this.validate();
-
-    return {
-      tableName: this.getTableName(),
-      columns: this.getColumns(),
-    };
-  }
-  public static getEntityDataOrThrowError(entity: unknown): EntityData {
-    if (
-      typeof entity === 'object' &&
-      'entityData' in entity &&
-      entity.entityData instanceof EntityData
-    ) {
-      return entity.entityData;
-    }
-
-    throw new WrongEntityError(
-      'Entity is not valid. Please set column decorators',
-    );
   }
 
   public validate(): void {
@@ -60,7 +34,7 @@ class EntityDataGetter {
     this.validatePropertyValues();
     if (Object.keys(this.propertyValidationErrors).length > 0) {
       throw new WrongPropertyError(
-        'Wrong entity properties',
+        'Wrong entity-data-data properties',
         this.propertyValidationErrors,
       );
     }
@@ -188,32 +162,6 @@ class EntityDataGetter {
 
     return !!(columnsData && columnsData.defaultValue !== undefined);
   }
-
-  private getTableName(): string {
-    return (
-      this.entityData.tableName || this.entity.constructor.name.toLowerCase()
-    );
-  }
-  private getColumns(): ColumnDataToHandel[] {
-    const columnsToSet: string[] = [...this.entityData.columns];
-    this.entityData.primaryColumns.forEach((primaryColumn: string) => {
-      if (this.entityData.autoIncrementColumn !== primaryColumn) {
-        columnsToSet.push(primaryColumn);
-      }
-    });
-
-    return columnsToSet.map((column: string) => {
-      const columnData = this.entityData.columnsData.get(column);
-
-      return {
-        name: (columnData && columnData.customName?.columnName) || column,
-        value:
-          this.entity[column] !== undefined
-            ? this.entity[column]
-            : columnData && columnData.defaultValue,
-      };
-    });
-  }
 }
 
-export default EntityDataGetter;
+export default Validator;

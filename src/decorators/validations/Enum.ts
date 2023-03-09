@@ -1,11 +1,15 @@
-import { PropertyDecoratorTarget } from '../../types/decorators/decorator';
-import EntityDataSetter from '../../helpers/entity/EntityDataSetter';
 import { MessageCode } from '../../consts/message';
-import { AllowedValues, EnumProps } from '../../types/decorators/enum';
+import {
+  AllowedValues,
+  EnumProps,
+} from '../../types/entity-data/decorators/enum';
 import {
   DecoratorDataMethodParams,
   ValidationDecoratorsMethodReturnType,
-} from '../../types/decorators/validation';
+} from '../../types/entity-data/validation';
+import { ObjectType } from '../../types/object';
+import { EntityDataStore } from '../../utils/entity-data';
+
 const EnumValidator = ({
   value,
   propertyKey,
@@ -26,8 +30,8 @@ const EnumValidator = ({
 
 const Enum =
   (allowedValues: AllowedValues): PropertyDecorator =>
-  (target: PropertyDecoratorTarget, propertyKey: string | symbol): void => {
-    EntityDataSetter.setPropertyValidation({
+  (target: ObjectType, propertyKey: string | symbol): void => {
+    EntityDataStore.setPropertyValidation({
       target,
       propertyKey,
       decoratorKey: 'enumDecorator',

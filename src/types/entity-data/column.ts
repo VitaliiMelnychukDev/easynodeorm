@@ -1,7 +1,4 @@
-export type ColumnDecoratorProps = {
-  customName?: string;
-  defaultValue?: string | number | boolean;
-};
+import { ColumnDecoratorProps } from './decorators/column';
 
 type ColumnName = {
   propertyName: string;

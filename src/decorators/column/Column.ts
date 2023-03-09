@@ -1,11 +1,11 @@
-import { PropertyDecoratorTarget } from '../../types/decorators/decorator';
-import EntityDataSetter from '../../helpers/entity/EntityDataSetter';
-import { ColumnDecoratorProps } from '../../types/decorators/column';
+import { ColumnDecoratorProps } from '../../types/entity-data/decorators/column';
+import { ObjectType } from '../../types/object';
+import { EntityDataStore } from '../../utils/entity-data';
 
 const Column =
   (columnProps: ColumnDecoratorProps = {}): PropertyDecorator =>
-  (target: PropertyDecoratorTarget, propertyKey: string | symbol): void => {
-    EntityDataSetter.setColumnProperties(target, propertyKey, columnProps);
+  (target: ObjectType, propertyKey: string | symbol): void => {
+    EntityDataStore.setColumnProperties(target, propertyKey, columnProps);
   };
 
 export default Column;

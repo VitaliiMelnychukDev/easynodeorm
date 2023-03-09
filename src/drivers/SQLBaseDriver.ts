@@ -2,11 +2,14 @@ import { SupportedDatabases } from '../types/global';
 import DriverLoader from './DriverLoader';
 import BaseQueryManager from './BaseQueryManager';
 import BaseRepository from './BaseRepository';
+import { PropertyClassType } from '../types/object';
 
 abstract class SQLBaseDriver {
   abstract readonly queryManager: BaseQueryManager;
 
-  abstract getRepository<Entity>(): BaseRepository<Entity>;
+  abstract getRepository<Entity>(
+    entityClass: PropertyClassType<Entity>,
+  ): BaseRepository<Entity>;
 
   static getDriver(dbName: SupportedDatabases): any {
     return DriverLoader.load(dbName);

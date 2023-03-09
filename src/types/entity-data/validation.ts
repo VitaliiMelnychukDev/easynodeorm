@@ -1,6 +1,6 @@
-import LengthProps from './length';
+import LengthProps from './decorators/length';
 import { MessageCode } from '../../consts/message';
-import { EnumProps } from './enum';
+import { EnumProps } from './decorators/enum';
 
 export type ValidationDecoratorsMethodReturnType = string | null | MessageCode;
 export type BaseDecoratorDataMethodParams = {

@@ -1,12 +1,8 @@
-import { EntityData } from './entity';
 import { SupportedDecorators, SupportedDecoratorsKeys } from './validation';
-
-export type PropertyDecoratorTarget = {
-  entityData?: EntityData;
-};
+import { ObjectType } from '../object';
 
 export type SetPropertyValidationProps = {
-  target: PropertyDecoratorTarget;
+  target: ObjectType;
   propertyKey: string | symbol;
   decoratorKey: SupportedDecoratorsKeys;
   decoratorProps: SupportedDecorators[SupportedDecoratorsKeys];

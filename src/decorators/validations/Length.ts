@@ -1,11 +1,12 @@
-import { PropertyDecoratorTarget } from '../../types/decorators/decorator';
-import EntityDataSetter from '../../helpers/entity/EntityDataSetter';
-import LengthProps from '../../types/decorators/length';
+import LengthProps from '../../types/entity-data/decorators/length';
 import { MessageCode } from '../../consts/message';
 import {
   DecoratorDataMethodParams,
   ValidationDecoratorsMethodReturnType,
-} from '../../types/decorators/validation';
+} from '../../types/entity-data/validation';
+import { ObjectType } from '../../types/object';
+import { EntityDataStore } from '../../utils/entity-data';
+
 const LengthValidator = ({
   value,
   propertyKey,
@@ -28,8 +29,8 @@ const LengthValidator = ({
 
 const Length =
   (min: number, max?: number): PropertyDecorator =>
-  (target: PropertyDecoratorTarget, propertyKey: string | symbol): void => {
-    EntityDataSetter.setPropertyValidation({
+  (target: ObjectType, propertyKey: string | symbol): void => {
+    EntityDataStore.setPropertyValidation({
       target,
       propertyKey,
       decoratorKey: 'lengthDecorator',

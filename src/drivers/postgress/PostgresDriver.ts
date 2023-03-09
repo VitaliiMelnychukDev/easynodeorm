@@ -4,6 +4,7 @@ import ConnectionHelper from './helpers/Connection';
 import PostgresQueryManager from './PostgresQueryManager';
 import { PostgresConnection } from './types/connection';
 import BaseRepository from '../BaseRepository';
+import { PropertyClassType } from '../../types/object';
 
 class PostgresDriver extends SQLBaseDriver {
   private readonly dbConnection: PostgresConnection;
@@ -22,8 +23,10 @@ class PostgresDriver extends SQLBaseDriver {
     this.queryManager = new PostgresQueryManager(this.dbConnection);
   }
 
-  getRepository<Entity>(): BaseRepository<Entity> {
-    return new BaseRepository<Entity>(this.queryManager);
+  getRepository<Entity>(
+    entityClass: PropertyClassType<Entity>,
+  ): BaseRepository<Entity> {
+    return new BaseRepository<Entity>(this.queryManager, entityClass);
   }
 }
 

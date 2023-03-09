@@ -12,7 +12,7 @@ class DataSource {
       case 'postgres':
         return new PostgresDriver(options) as Driver[T];
       case 'mysql':
-        return new MySQLDriver(options) as Driver[T];
+        return new MySQLDriver() as Driver[T];
       default:
         throw new Error("Only Postgres db's are supported");
     }

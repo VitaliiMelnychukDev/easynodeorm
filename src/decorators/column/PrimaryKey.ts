@@ -1,10 +1,10 @@
-import { PropertyDecoratorTarget } from '../../types/decorators/decorator';
-import EntityDataSetter from '../../helpers/entity/EntityDataSetter';
+import { ObjectType } from '../../types/object';
+import { EntityDataStore } from '../../utils/entity-data';
 
 const PrimaryKey =
   (): PropertyDecorator =>
-  (target: PropertyDecoratorTarget, propertyKey: string | symbol): void => {
-    EntityDataSetter.setPrimaryColumn(target, propertyKey);
+  (target: ObjectType, propertyKey: string | symbol): void => {
+    EntityDataStore.setPrimaryColumn(target, propertyKey);
   };
 
 export default PrimaryKey;

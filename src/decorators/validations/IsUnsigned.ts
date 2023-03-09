@@ -1,10 +1,10 @@
-import { PropertyDecoratorTarget } from '../../types/decorators/decorator';
-import EntityDataSetter from '../../helpers/entity/EntityDataSetter';
 import { MessageCode } from '../../consts/message';
 import {
   BaseDecoratorDataMethodParams,
   ValidationDecoratorsMethodReturnType,
-} from '../../types/decorators/validation';
+} from '../../types/entity-data/validation';
+import { ObjectType } from '../../types/object';
+import { EntityDataStore } from '../../utils/entity-data';
 
 const IsUnsignedValidator = ({
   value,
@@ -22,8 +22,8 @@ const IsUnsignedValidator = ({
 };
 const IsUnsigned =
   (): PropertyDecorator =>
-  (target: PropertyDecoratorTarget, propertyKey: string | symbol): void => {
-    EntityDataSetter.setPropertyValidation({
+  (target: ObjectType, propertyKey: string | symbol): void => {
+    EntityDataStore.setPropertyValidation({
       target,
       propertyKey,
       decoratorKey: 'isUnsigned',

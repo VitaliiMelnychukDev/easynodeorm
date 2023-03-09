@@ -1,9 +1,9 @@
-import EntityDataSetter from '../../helpers/entity/EntityDataSetter';
+import { EntityDataStore } from '../../utils/entity-data';
 
 const Entity = (tableName: string): ClassDecorator => {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return (target: Function): void => {
-    EntityDataSetter.setCustomTableName(target.prototype, tableName);
+    EntityDataStore.setCustomTableName(target.prototype, tableName);
   };
 };
 
