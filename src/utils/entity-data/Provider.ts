@@ -1,17 +1,19 @@
-import { ObjectType } from '../../types/object';
+import { ObjectType, PropertyClassType } from '../../types/object';
 import {
   ColumnDataToHandel,
   EntityData,
   PreparedEntityData,
 } from '../../types/entity-data/entity';
-import WrongEntityError from '../../error/WrongEntityError';
 import { EntityDataStore } from './index';
 
 class Provider {
   private readonly entity: ObjectType;
   private readonly entityData: EntityData;
-  constructor(entity: ObjectType) {
-    this.entityData = Provider.getEntityDataOrThrowError(entity);
+  constructor(entity: ObjectType, entityClass: PropertyClassType<unknown>) {
+    this.entityData = EntityDataStore.getEntityDataOrThrowError(
+      entityClass,
+      entity.constructor.name,
+    );
     this.entity = entity;
   }
 
@@ -20,19 +22,6 @@ class Provider {
       tableName: this.getTableName(),
       columns: this.getColumns(),
     };
-  }
-  public static getEntityDataOrThrowError(entity: ObjectType): EntityData {
-    const entityData = EntityDataStore.getEntityDataByFunction(
-      entity.constructor,
-    );
-
-    if (!entityData) {
-      throw new WrongEntityError(
-        'Entity is not valid. Please set column entity-data',
-      );
-    }
-
-    return entityData;
   }
 
   private getTableName(): string {

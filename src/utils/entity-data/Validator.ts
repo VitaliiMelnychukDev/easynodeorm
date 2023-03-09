@@ -7,6 +7,7 @@ import { MessageCode } from '../../consts/message';
 import {
   ObjectType,
   ObjectWithPropertyTypesStringArray,
+  PropertyClassType,
 } from '../../types/object';
 import { EntityDataStore } from './index';
 
@@ -16,8 +17,11 @@ class Validator {
   private readonly entityClassName: string;
   private readonly propertyValidationErrors: ObjectWithPropertyTypesStringArray =
     {};
-  constructor(entity: ObjectType) {
-    this.entityData = EntityDataStore.getEntityDataOrThrowError(entity);
+  constructor(entity: ObjectType, entityClass: PropertyClassType<unknown>) {
+    this.entityData = EntityDataStore.getEntityDataOrThrowError(
+      entityClass,
+      entity.constructor.name,
+    );
     this.entity = entity;
     this.entityClassName = entity.constructor.name;
   }

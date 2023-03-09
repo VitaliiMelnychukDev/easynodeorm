@@ -1,6 +1,7 @@
 import { ColumnData, ColumnsData } from './column';
 import { EntityValidations, PropertyValidations } from './validation';
 import { PropertyClassType } from '../object';
+import { AllowedTypes } from '../global';
 
 export class EntityData {
   validations: EntityValidations = new Map<string, PropertyValidations>();
@@ -23,7 +24,7 @@ export type EntityDataStoreType = Map<EntityDataStoreKeyType, EntityData>;
 
 export type ColumnDataToHandel = {
   name: string;
-  value: string | boolean | number;
+  value: AllowedTypes;
 };
 
 export type PreparedEntityData = {

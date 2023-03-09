@@ -5,7 +5,7 @@ import {
   EntityDataStoreKeyType,
   EntityDataStoreType,
 } from '../../types/entity-data/entity';
-import { ObjectType } from '../../types/object';
+import { ObjectType, PropertyClassType } from '../../types/object';
 import WrongEntityError from '../../error/WrongEntityError';
 import { ColumnDecoratorProps } from '../../types/entity-data/decorators/column';
 
@@ -101,12 +101,15 @@ class Store {
     return this.entityDataStore.get(fC);
   }
 
-  public static getEntityDataOrThrowError(entity: ObjectType): EntityData {
-    const entityData = Store.getEntityDataByFunction(entity.constructor);
+  public static getEntityDataOrThrowError(
+    entity: PropertyClassType<unknown>,
+    entityName = '',
+  ): EntityData {
+    const entityData = Store.getEntityDataByFunction(entity);
 
     if (!entityData) {
       throw new WrongEntityError(
-        `Entity ${entity.constructor.name} is not valid. Please set column decorators`,
+        `Entity ${entityName} is not valid. Please set column decorators`,
       );
     }
 

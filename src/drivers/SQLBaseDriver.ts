@@ -15,14 +15,14 @@ abstract class SQLBaseDriver {
     return DriverLoader.load(dbName);
   }
 
-  getCustomRepository<
-    Entity,
-    CustomRepository extends BaseRepository<Entity>,
+  getCustomRepository<Entity, CustomRepository extends BaseRepository<Entity>>(
     // eslint-disable-next-line @typescript-eslint/ban-types
-  >(repository: Function): CustomRepository {
+    repository: Function,
+    entityClass: PropertyClassType<Entity>,
+  ): CustomRepository {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    return new repository<Entity>(this.queryManager);
+    return new repository<Entity>(this.queryManager, entityClass);
   }
 }
 

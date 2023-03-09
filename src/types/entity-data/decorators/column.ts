@@ -1,4 +1,6 @@
+import { AllowedTypes } from '../../global';
+
 export type ColumnDecoratorProps = {
   customName?: string;
-  defaultValue?: string | number | boolean;
+  defaultValue?: AllowedTypes;
 };
