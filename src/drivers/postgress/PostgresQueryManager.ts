@@ -1,9 +1,9 @@
 import { PostgresConnection } from './types/connection';
-import BaseQueryManager from '../BaseQueryManager';
+import DataManipulationQueryManager from '../DataManipulationQueryManager';
 import PostgresInsertBuilder from './query-builders/PostgresInsertBuilder';
 import { QueryResult } from './types/query';
 
-class PostgresQueryManager extends BaseQueryManager {
+class PostgresQueryManager extends DataManipulationQueryManager {
   protected readonly dbConnection: PostgresConnection;
 
   public constructor(dbConnection: any) {

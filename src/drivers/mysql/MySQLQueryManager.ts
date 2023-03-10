@@ -1,6 +1,6 @@
-import BaseQueryManager from '../BaseQueryManager';
+import DataManipulationQueryManager from '../DataManipulationQueryManager';
 
-class MySQLQueryManager extends BaseQueryManager {
+class MySQLQueryManager extends DataManipulationQueryManager {
   public constructor() {
     super({});
   }

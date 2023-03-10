@@ -5,11 +5,15 @@ import PostgresQueryManager from './PostgresQueryManager';
 import { PostgresConnection } from './types/connection';
 import BaseRepository from '../BaseRepository';
 import { PropertyClassType } from '../../types/object';
+import { AllowedTypes } from './types/types';
+import DataDefinitionPostgresQueryManager from './DataDefinitionPostgresQueryManager';
 
-class PostgresDriver extends SQLBaseDriver {
+class PostgresDriver extends SQLBaseDriver<AllowedTypes> {
   private readonly dbConnection: PostgresConnection;
 
   public readonly queryManager: PostgresQueryManager;
+
+  public readonly dataDefinitionQueryManager: DataDefinitionPostgresQueryManager;
 
   public constructor(options: ConnectionOptions) {
     super();
@@ -21,6 +25,9 @@ class PostgresDriver extends SQLBaseDriver {
     );
 
     this.queryManager = new PostgresQueryManager(this.dbConnection);
+    this.dataDefinitionQueryManager = new DataDefinitionPostgresQueryManager(
+      this.dbConnection,
+    );
   }
 
   getRepository<Entity>(

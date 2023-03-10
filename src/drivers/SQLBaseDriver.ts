@@ -1,11 +1,14 @@
 import { SupportedDatabases } from '../types/global';
 import DriverLoader from './DriverLoader';
-import BaseQueryManager from './BaseQueryManager';
+import DataManipulationQueryManager from './DataManipulationQueryManager';
 import BaseRepository from './BaseRepository';
 import { PropertyClassType } from '../types/object';
+import DataDefinitionQueryManager from './DataDefinitionQueryManager';
 
-abstract class SQLBaseDriver {
-  abstract readonly queryManager: BaseQueryManager;
+abstract class SQLBaseDriver<AllowedTypes> {
+  abstract readonly queryManager: DataManipulationQueryManager;
+
+  abstract readonly dataDefinitionQueryManager: DataDefinitionQueryManager<AllowedTypes>;
 
   abstract getRepository<Entity>(
     entityClass: PropertyClassType<Entity>,

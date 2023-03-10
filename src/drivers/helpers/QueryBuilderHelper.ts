@@ -4,13 +4,7 @@ import { wrongQueryMessage } from '../consts/messages';
 import { escape } from 'sqlstring';
 
 class QueryBuilderHelper {
-  public static wrapValue(value: string, wrapper: string): string {
-    return `${wrapper}${value}${wrapper}`;
-  }
-
-  public static prepareValueBeforeInsert(
-    value: AllowedTypes,
-  ): AllowedTypesToInsert {
+  public static prepareValue(value: AllowedTypes): AllowedTypesToInsert {
     switch (typeof value) {
       case 'number':
         return Number(value);
@@ -27,6 +21,9 @@ class QueryBuilderHelper {
       default:
         throw new WrongQuery(wrongQueryMessage);
     }
+  }
+  public static getEnumValuesQuery(enumValues: string[]): string {
+    return `(${enumValues.map((enumValue) => `'${enumValue}'`).join(',')})`;
   }
 }
 

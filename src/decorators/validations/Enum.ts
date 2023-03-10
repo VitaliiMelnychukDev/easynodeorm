@@ -15,7 +15,7 @@ const EnumValidator = ({
   propertyKey,
   props,
 }: DecoratorDataMethodParams<EnumProps>): ValidationDecoratorsMethodReturnType => {
-  if (typeof value !== 'string' && typeof value !== 'number') {
+  if (typeof value !== 'string') {
     return MessageCode.NotValidPropertyType;
   }
 

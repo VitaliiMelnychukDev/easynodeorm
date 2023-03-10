@@ -1,16 +1,16 @@
-import BaseQueryManager from './BaseQueryManager';
+import DataManipulationQueryManager from './DataManipulationQueryManager';
 import { ObjectType, PropertyClassType } from '../types/object';
 import { EntityDataManager, EntityDataTransformer } from '../utils/entity-data';
 import { InsertBuilderRows } from './types/insertBuilder';
 import WrongQueryResult from '../error/WrongQueryResult';
 
 class BaseRepository<Entity> {
-  protected readonly queryManager: BaseQueryManager;
+  protected readonly queryManager: DataManipulationQueryManager;
 
   protected readonly entityClass: PropertyClassType<Entity>;
 
   constructor(
-    queryManager: BaseQueryManager,
+    queryManager: DataManipulationQueryManager,
     entityClass: PropertyClassType<Entity>,
   ) {
     this.queryManager = queryManager;

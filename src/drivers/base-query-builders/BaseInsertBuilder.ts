@@ -1,7 +1,5 @@
 import { InsertBuilderRows } from '../types/insertBuilder';
 import WrongInsertQuery from '../../error/WrongInsertQuery';
-import { defaultQueryMarks } from '../consts/queryMarks';
-import { QueryMarks } from '../types/QueryManager';
 import QueryBuilderHelper from '../helpers/QueryBuilderHelper';
 import { AllowedTypes } from '../../types/global';
 
@@ -10,12 +8,6 @@ class BaseInsertBuilder {
 
   public valueStatement = 'VALUES';
 
-  public queryMarks: QueryMarks = defaultQueryMarks;
-
-  constructor(queryMarks: QueryMarks = defaultQueryMarks) {
-    this.queryMarks = queryMarks;
-  }
-
   getTableName(tableName: string): string {
     return tableName;
   }
@@ -23,19 +15,17 @@ class BaseInsertBuilder {
   getColumnsQuery(rows: InsertBuilderRows): string {
     const columns: string[] = rows[0].map((property) => property.name);
 
-    return `(${columns.join(this.queryMarks.propertiesDivider)})`;
+    return `(${columns.join(',')})`;
   }
 
   getRowValuesQuery(values: AllowedTypes[]): string {
     return values
-      .map((value) => QueryBuilderHelper.prepareValueBeforeInsert(value))
-      .join(this.queryMarks.propertiesDivider);
+      .map((value) => QueryBuilderHelper.prepareValue(value))
+      .join(',');
   }
 
   getRowsQuery(rowValues: string[]): string {
-    return rowValues
-      .map((rowValue) => `(${rowValue})`)
-      .join(this.queryMarks.propertiesDivider);
+    return rowValues.map((rowValue) => `(${rowValue})`).join(',');
   }
 
   getRowsQueryWithValues(rows: InsertBuilderRows): string {
