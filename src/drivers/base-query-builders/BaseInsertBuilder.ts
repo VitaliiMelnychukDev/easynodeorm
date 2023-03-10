@@ -28,12 +28,7 @@ class BaseInsertBuilder {
 
   getRowValuesQuery(values: AllowedTypes[]): string {
     return values
-      .map((value) =>
-        QueryBuilderHelper.prepareValueBeforeInsert(
-          value,
-          this.queryMarks.stringPropertiesQuote,
-        ),
-      )
+      .map((value) => QueryBuilderHelper.prepareValueBeforeInsert(value))
       .join(this.queryMarks.propertiesDivider);
   }
 
