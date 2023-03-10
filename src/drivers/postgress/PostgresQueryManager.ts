@@ -1,6 +1,7 @@
 import { PostgresConnection } from './types/connection';
 import BaseQueryManager from '../BaseQueryManager';
 import PostgresInsertBuilder from './query-builders/PostgresInsertBuilder';
+import { QueryResult } from './types/query';
 
 class PostgresQueryManager extends BaseQueryManager {
   protected readonly dbConnection: PostgresConnection;
@@ -12,8 +13,10 @@ class PostgresQueryManager extends BaseQueryManager {
     this.dbConnection = dbConnection;
   }
 
-  async query<T>(queryString: string): Promise<T> {
-    return this.dbConnection.query(queryString);
+  async query<T>(queryString: string): Promise<T[]> {
+    const result: QueryResult<T> = await this.dbConnection.query(queryString);
+
+    return result.rows;
   }
 }
 

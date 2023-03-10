@@ -75,6 +75,7 @@ class Store {
   public static setPrimaryColumn(
     target: ObjectType,
     propertyKey: string | symbol,
+    customName?: ColumnDecoratorProps['customName'],
   ): void {
     if (typeof propertyKey !== 'string') return;
     const entityData = Store.getExistedEntityDataOrCreate(target);
@@ -82,17 +83,27 @@ class Store {
     if (!entityData.primaryColumns.includes(propertyKey)) {
       entityData.primaryColumns.push(propertyKey);
     }
+
+    if (customName) {
+      entityData.columnsData.set(propertyKey, {
+        customName: {
+          propertyName: propertyKey,
+          columnName: customName,
+        },
+      });
+    }
   }
 
   public static setPrimaryAutoIncrementColumn(
     target: ObjectType,
     propertyKey: string | symbol,
+    customName?: ColumnDecoratorProps['customName'],
   ): void {
     if (typeof propertyKey !== 'string') return;
     const entityData = Store.getExistedEntityDataOrCreate(target);
 
     entityData.autoIncrementColumn = propertyKey;
-    Store.setPrimaryColumn(target, propertyKey);
+    Store.setPrimaryColumn(target, propertyKey, customName);
   }
 
   public static getEntityDataByFunction(

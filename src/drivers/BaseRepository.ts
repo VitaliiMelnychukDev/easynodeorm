@@ -1,7 +1,8 @@
 import BaseQueryManager from './BaseQueryManager';
-import { PropertyClassType } from '../types/object';
-import { EntityDataManager } from '../utils/entity-data';
+import { ObjectType, PropertyClassType } from '../types/object';
+import { EntityDataManager, EntityDataTransformer } from '../utils/entity-data';
 import { InsertBuilderRows } from './types/insertBuilder';
+import WrongQueryResult from '../error/WrongQueryResult';
 
 class BaseRepository<Entity> {
   protected readonly queryManager: BaseQueryManager;
@@ -21,14 +22,26 @@ class BaseRepository<Entity> {
       this.entityClass,
     );
 
-    const queryResult = await this.queryManager.insert(insertData.tableName, [
-      insertData.columns,
-    ]);
+    const createdEntries: ObjectType[] = await this.queryManager.insert(
+      insertData.tableName,
+      [insertData.columns],
+    );
 
-    return queryResult as Entity;
+    if (!createdEntries.length) {
+      throw new WrongQueryResult(
+        'Something went wrong in process of inserting data',
+      );
+    }
+
+    return EntityDataTransformer.transformToEntity(
+      createdEntries[0],
+      this.entityClass,
+    );
   }
 
   async createMany(entity: Entity[]): Promise<Entity[]> {
+    if (entity.length === 0) return [];
+
     let tableName = '';
     const properties: InsertBuilderRows = [];
     entity.forEach((entity: Entity) => {
@@ -40,7 +53,21 @@ class BaseRepository<Entity> {
       properties.push(insertData.columns);
     });
 
-    return this.queryManager.insert(tableName, properties);
+    const createdEntries: ObjectType[] = await this.queryManager.insert(
+      tableName,
+      properties,
+    );
+
+    if (!createdEntries.length) {
+      throw new WrongQueryResult(
+        'Something went wrong in process of inserting data',
+      );
+    }
+
+    return EntityDataTransformer.transformArrayToEntities(
+      createdEntries,
+      this.entityClass,
+    );
   }
 }
 

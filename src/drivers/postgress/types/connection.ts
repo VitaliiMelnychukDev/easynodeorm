@@ -1,5 +1,7 @@
+import { QueryResult } from './query';
+
 export interface PostgresConnection {
-  query(query: string): Promise<any>;
+  query<T>(query: string): QueryResult<T>;
 }
 export default interface PostgresConnectionParams {
   host: string;
