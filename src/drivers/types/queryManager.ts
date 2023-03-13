@@ -1,10 +1,12 @@
-import BaseInsertBuilder from '../base-query-builders/BaseInsertBuilder';
-import BaseCreateTableBuilder from '../base-query-builders/BaseCreateTableBuilder';
+import InsertBuilder from './builders/InsertBuilder';
+import TableBuilder from './builders/TableBuilder';
+import SelectBuilder from './builders/SelectBuilder';
 
 export type DataDefinitionQueryManagerProps<AllowedTypes> = {
-  createTableBuilder?: BaseCreateTableBuilder<AllowedTypes>;
+  createTableBuilder?: TableBuilder<AllowedTypes>;
 };
 
 export type DataManipulationQueryManagerProps = {
-  insertBuilder?: BaseInsertBuilder;
+  insertBuilder?: InsertBuilder;
+  selectBuilder?: SelectBuilder;
 };

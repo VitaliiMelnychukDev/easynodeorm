@@ -1,9 +1,9 @@
 import BaseInsertBuilder from '../../base-query-builders/BaseInsertBuilder';
-import { InsertBuilderRows } from '../../types/insertBuilder';
+import { InsertBuilderRows } from '../../types/insert';
 
 class PostgresInsertBuilder extends BaseInsertBuilder {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  insertAfterQuery(rows: InsertBuilderRows): string {
+  afterInsertSql(rows: InsertBuilderRows): string {
     return ' RETURNING *';
   }
 }

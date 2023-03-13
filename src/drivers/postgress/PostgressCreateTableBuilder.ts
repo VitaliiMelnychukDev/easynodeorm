@@ -1,11 +1,11 @@
-import BaseCreateTableBuilder from '../base-query-builders/BaseCreateTableBuilder';
+import BaseTableBuilder from '../base-query-builders/BaseTableBuilder';
 import { AllowedTypes } from './types/types';
-import { ColumnProps } from '../types/createBuilder';
+import { ColumnProps } from '../types/createTable';
 import WrongCreateQuery from '../../error/WrongCreateQuery';
 import TypeHelper from './helpers/TypeHelper';
 
-class PostgresCreateTableBuilder extends BaseCreateTableBuilder<AllowedTypes> {
-  public getUnsignedPartQuery(
+class PostgresCreateTableBuilder extends BaseTableBuilder<AllowedTypes> {
+  public getUnsignedPart(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     isUnsigned?: ColumnProps<AllowedTypes>['isUnsigned'],
   ): string {
@@ -16,18 +16,16 @@ class PostgresCreateTableBuilder extends BaseCreateTableBuilder<AllowedTypes> {
     );
   }
 
-  public getAutoIncrementedColumnQuery(
-    column: ColumnProps<AllowedTypes>,
-  ): string {
+  public getAutoIncrementedColumn(column: ColumnProps<AllowedTypes>): string {
     const autoIncrementedColumn: ColumnProps<AllowedTypes> = {
       ...column,
       type: 'serial',
     };
 
-    return this.getSimpleColumnQuery(autoIncrementedColumn);
+    return this.getSimpleColumn(autoIncrementedColumn);
   }
 
-  public getEnumColumnQuery(column: ColumnProps<AllowedTypes>): string {
+  public getEnumColumn(column: ColumnProps<AllowedTypes>): string {
     if (column.type !== 'enum') {
       return '';
     }
@@ -40,9 +38,9 @@ class PostgresCreateTableBuilder extends BaseCreateTableBuilder<AllowedTypes> {
 
     const typeName = column.enumTypeName;
     const typeQuery = TypeHelper.createTypeQuery(typeName, column.enum);
-    this.addBeforeSqlQuery(typeQuery);
+    this.addBeforeSql(typeQuery);
 
-    return `${column.name} ${typeName} ${this.getDefaultPartQuery(column)}`;
+    return `${column.name} ${typeName} ${this.getColumnDefaultPart(column)}`;
   }
 }
 

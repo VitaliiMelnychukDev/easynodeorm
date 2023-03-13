@@ -1,7 +1,7 @@
 import DataManipulationQueryManager from './DataManipulationQueryManager';
 import { ObjectType, PropertyClassType } from '../types/object';
 import { EntityDataManager, EntityDataTransformer } from '../utils/entity-data';
-import { InsertBuilderRows } from './types/insertBuilder';
+import { InsertBuilderRows } from './types/insert';
 import WrongQueryResult from '../error/WrongQueryResult';
 
 class BaseRepository<Entity> {

@@ -1,8 +1,9 @@
-import { ColumnProps } from '../types/createBuilder';
+import { ColumnProps } from '../types/createTable';
 import QueryBuilderHelper from '../helpers/QueryBuilderHelper';
 import WrongCreateQuery from '../../error/WrongCreateQuery';
+import TableBuilder from '../types/builders/TableBuilder';
 
-class BaseCreateTableBuilder<AllowedTypes> {
+class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
   private beforeSqlQueries: string[] = [];
 
   public dbEnumType = 'ENUM';
@@ -21,22 +22,22 @@ class BaseCreateTableBuilder<AllowedTypes> {
 
   public uniqueStatement = 'UNIQUE';
 
-  public addBeforeSqlQuery(query: string): void {
+  public addBeforeSql(query: string): void {
     this.beforeSqlQueries.push(query);
   }
 
-  public getLengthPartQuery(length?: number): string {
+  public getColumnLengthPart(length?: number): string {
     return length ? `(${length})` : '';
   }
 
-  public getTypePartQuery(
+  public getColumnTypePart(
     type: AllowedTypes | string,
     length?: number,
   ): string {
-    return `${type}${this.getLengthPartQuery(length)}`;
+    return `${type}${this.getColumnLengthPart(length)}`;
   }
 
-  public getDefaultPartQuery(column: ColumnProps<AllowedTypes>): string {
+  public getColumnDefaultPart(column: ColumnProps<AllowedTypes>): string {
     if (column.autoGenerationStrategy) return '';
 
     return column.default !== undefined
@@ -48,13 +49,13 @@ class BaseCreateTableBuilder<AllowedTypes> {
       : this.notNullStatement;
   }
 
-  public getUnsignedPartQuery(
+  public getUnsignedPart(
     isUnsigned?: ColumnProps<AllowedTypes>['isUnsigned'],
   ): string {
     return isUnsigned ? this.unsignedStatement : '';
   }
 
-  public getEnumColumnQuery(column: ColumnProps<AllowedTypes>): string {
+  public getEnumColumn(column: ColumnProps<AllowedTypes>): string {
     if (column.type !== 'enum') {
       return '';
     }
@@ -63,47 +64,41 @@ class BaseCreateTableBuilder<AllowedTypes> {
       throw new WrongCreateQuery('enum properties for enum type column.');
     }
 
-    return `${column.name} ${this.getTypePartQuery(
+    return `${column.name} ${this.getColumnTypePart(
       this.dbEnumType,
       column.length,
     )} ${QueryBuilderHelper.getEnumValuesQuery(column.enum)})`;
   }
 
-  public getSimpleColumnQuery(column: ColumnProps<AllowedTypes>): string {
-    return `${column.name} ${this.getTypePartQuery(
+  public getSimpleColumn(column: ColumnProps<AllowedTypes>): string {
+    return `${column.name} ${this.getColumnTypePart(
       column.type,
       column.length,
-    )} ${this.getUnsignedPartQuery(
-      column.isUnsigned,
-    )} ${this.getDefaultPartQuery(column)}`;
+    )} ${this.getUnsignedPart(column.isUnsigned)} ${this.getColumnDefaultPart(
+      column,
+    )}`;
   }
 
-  public getAutoIncrementedColumnQuery(
-    column: ColumnProps<AllowedTypes>,
-  ): string {
-    return `${this.getSimpleColumnQuery(column)} ${
-      this.autoIncrementStatement
-    }`;
+  public getAutoIncrementedColumn(column: ColumnProps<AllowedTypes>): string {
+    return `${this.getSimpleColumn(column)} ${this.autoIncrementStatement}`;
   }
 
-  public getColumnQuery(column: ColumnProps<AllowedTypes>): string {
+  public getColumn(column: ColumnProps<AllowedTypes>): string {
     if (column.type === 'enum') {
-      return this.getEnumColumnQuery(column);
+      return this.getEnumColumn(column);
     }
 
     if (column.autoGenerationStrategy) {
-      return this.getAutoIncrementedColumnQuery(column);
+      return this.getAutoIncrementedColumn(column);
     }
 
-    return this.getSimpleColumnQuery(column);
+    return this.getSimpleColumn(column);
   }
-  public getColumnsQueries(columns: ColumnProps<AllowedTypes>[]): string[] {
-    return columns.map((column) => this.getColumnQuery(column));
+  public getColumns(columns: ColumnProps<AllowedTypes>[]): string[] {
+    return columns.map((column) => this.getColumn(column));
   }
 
-  public getPrimaryKeyConstraintQuery(
-    columns: ColumnProps<AllowedTypes>[],
-  ): string {
+  public getPrimaryKeyConstraint(columns: ColumnProps<AllowedTypes>[]): string {
     const primaryKeys: string[] = [];
     columns.forEach((column) => {
       if (column.isPrimary) {
@@ -116,21 +111,19 @@ class BaseCreateTableBuilder<AllowedTypes> {
       : '';
   }
 
-  public getUniqueColumnConstraintQuery(columnName: string): string {
+  public getUniqueColumnConstraint(columnName: string): string {
     return `${this.uniqueStatement}(${columnName})`;
   }
 
-  public getConstraintsQueries(columns: ColumnProps<AllowedTypes>[]): string[] {
+  public getConstraints(columns: ColumnProps<AllowedTypes>[]): string[] {
     const constraintsQueries: string[] = [];
 
-    const primaryKeyConstraint = this.getPrimaryKeyConstraintQuery(columns);
+    const primaryKeyConstraint = this.getPrimaryKeyConstraint(columns);
     if (primaryKeyConstraint) constraintsQueries.push(primaryKeyConstraint);
 
     columns.forEach((column) => {
       if (column.isUnique) {
-        constraintsQueries.push(
-          this.getUniqueColumnConstraintQuery(column.name),
-        );
+        constraintsQueries.push(this.getUniqueColumnConstraint(column.name));
       }
     });
 
@@ -143,17 +136,17 @@ class BaseCreateTableBuilder<AllowedTypes> {
       : '';
   }
 
-  public buildCreateTableQuery(
+  public getCreateTableSql(
     tableName: string,
     columns: ColumnProps<AllowedTypes>[],
   ): string {
     const mainQuery = `${this.createTableStatement} ${tableName} (${[
-      ...this.getColumnsQueries(columns),
-      ...this.getConstraintsQueries(columns),
+      ...this.getColumns(columns),
+      ...this.getConstraints(columns),
     ].join(',')})`;
 
     return `${this.getBeforeSqlQueries()} ${mainQuery}`;
   }
 }
 
-export default BaseCreateTableBuilder;
+export default BaseTableBuilder;

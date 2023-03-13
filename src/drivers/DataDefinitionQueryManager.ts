@@ -1,6 +1,6 @@
 import { DataDefinitionQueryManagerProps } from './types/queryManager';
-import BaseCreateTableBuilder from './base-query-builders/BaseCreateTableBuilder';
-import { ColumnProps } from './types/createBuilder';
+import BaseTableBuilder from './base-query-builders/BaseTableBuilder';
+import { ColumnProps } from './types/createTable';
 import WrongCreateQuery from '../error/WrongCreateQuery';
 import { Operation } from './consts/operation';
 
@@ -14,7 +14,7 @@ abstract class DataDefinitionQueryManager<AllowedTypes> {
   protected constructor(props: DataDefinitionQueryManagerProps<AllowedTypes>) {
     this.queryBuilders = {
       createTableBuilder:
-        props.createTableBuilder || new BaseCreateTableBuilder<AllowedTypes>(),
+        props.createTableBuilder || new BaseTableBuilder<AllowedTypes>(),
     };
   }
 
@@ -28,7 +28,7 @@ abstract class DataDefinitionQueryManager<AllowedTypes> {
       );
     }
 
-    const query = this.queryBuilders.createTableBuilder.buildCreateTableQuery(
+    const query = this.queryBuilders.createTableBuilder.getCreateTableSql(
       tableName,
       columnProps,
     );

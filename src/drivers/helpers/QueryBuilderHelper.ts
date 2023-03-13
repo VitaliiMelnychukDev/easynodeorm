@@ -1,10 +1,10 @@
 import WrongQuery from '../../error/WrongQuery';
-import { AllowedTypes, AllowedTypesToInsert } from '../../types/global';
+import { AllowedTypes, AllowedTypesToMakeQueryWith } from '../../types/global';
 import { wrongQueryMessage } from '../consts/messages';
 import { escape } from 'sqlstring';
 
 class QueryBuilderHelper {
-  public static prepareValue(value: AllowedTypes): AllowedTypesToInsert {
+  public static prepareValue(value: AllowedTypes): AllowedTypesToMakeQueryWith {
     switch (typeof value) {
       case 'number':
         return Number(value);
@@ -22,7 +22,7 @@ class QueryBuilderHelper {
         throw new WrongQuery(wrongQueryMessage);
     }
   }
-  public static getEnumValuesQuery(enumValues: string[]): string {
+  public static getEnumValuesQuery(enumValues: string[] | number[]): string {
     return `(${enumValues.map((enumValue) => `'${enumValue}'`).join(',')})`;
   }
 }

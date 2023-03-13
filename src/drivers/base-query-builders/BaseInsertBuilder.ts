@@ -1,9 +1,10 @@
-import { InsertBuilderRows } from '../types/insertBuilder';
+import { InsertBuilderRows } from '../types/insert';
 import WrongInsertQuery from '../../error/WrongInsertQuery';
 import QueryBuilderHelper from '../helpers/QueryBuilderHelper';
 import { AllowedTypes } from '../../types/global';
+import InsertBuilder from '../types/builders/InsertBuilder';
 
-class BaseInsertBuilder {
+class BaseInsertBuilder implements InsertBuilder {
   public queryStatement = 'INSERT INTO';
 
   public valueStatement = 'VALUES';
@@ -12,42 +13,29 @@ class BaseInsertBuilder {
     return tableName;
   }
 
-  getColumnsQuery(rows: InsertBuilderRows): string {
+  getColumns(rows: InsertBuilderRows): string {
     const columns: string[] = rows[0].map((property) => property.name);
 
     return `(${columns.join(',')})`;
   }
 
-  getRowValuesQuery(values: AllowedTypes[]): string {
+  getRowValues(values: AllowedTypes[]): string {
     return values
       .map((value) => QueryBuilderHelper.prepareValue(value))
       .join(',');
   }
 
-  getRowsQuery(rowValues: string[]): string {
+  getRows(rowValues: string[]): string {
     return rowValues.map((rowValue) => `(${rowValue})`).join(',');
   }
 
-  getRowsQueryWithValues(rows: InsertBuilderRows): string {
+  getRowsSqlWithValues(rows: InsertBuilderRows): string {
     const rowQueries = rows.map((row) => {
       const rowValues = row.map((rowValue) => rowValue.value);
 
-      return this.getRowValuesQuery(rowValues);
+      return this.getRowValues(rowValues);
     });
-    return `${this.valueStatement} ${this.getRowsQuery(rowQueries)}`;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  insertAfterQuery(rows: InsertBuilderRows): string {
-    return '';
-  }
-
-  buildQuery(tableName: string, rows: InsertBuilderRows): string {
-    return `${this.queryStatement} ${this.getTableName(
-      tableName,
-    )} ${this.getColumnsQuery(rows)} ${this.getRowsQueryWithValues(
-      rows,
-    )}${this.insertAfterQuery(rows)}`;
+    return `${this.valueStatement} ${this.getRows(rowQueries)}`;
   }
 
   checkProperties(rows: InsertBuilderRows): void {
@@ -58,10 +46,19 @@ class BaseInsertBuilder {
     }
   }
 
-  getQuery(tableName: string, rows: InsertBuilderRows): string {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  afterInsertSql(rows: InsertBuilderRows): string {
+    return '';
+  }
+
+  getInsertSql(tableName: string, rows: InsertBuilderRows): string {
     this.checkProperties(rows);
 
-    return this.buildQuery(tableName, rows);
+    return `${this.queryStatement} ${this.getTableName(
+      tableName,
+    )} ${this.getColumns(rows)} ${this.getRowsSqlWithValues(
+      rows,
+    )} ${this.afterInsertSql(rows)}`;
   }
 }
 
