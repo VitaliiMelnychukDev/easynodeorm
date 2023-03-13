@@ -19,7 +19,9 @@ class BaseDeleteBuilder implements DeleteBuilder {
 
   validateProps(props: DeleteProps): void {
     if (!props.tableName) {
-      throw new WrongDeleteQuery('table name is required for delete statement');
+      throw new WrongDeleteQuery(
+        'Table name can not be empty for delete statement',
+      );
     }
   }
   getDeleteSql(props: DeleteProps): string {

@@ -6,6 +6,8 @@ import SelectBuilder from './base-query-builders/BaseSelectBuilder';
 import { Select } from './types/select';
 import BaseDeleteBuilder from './base-query-builders/BaseDeleteBuilder';
 import { DeleteProps } from './types/delete';
+import BaseUpdateBuilder from './base-query-builders/BaseUpdateBuilder';
+import { UpdateProps } from './types/update';
 
 abstract class DataManipulationQueryManager {
   abstract query<T>(query: string, operation: string): Promise<T[]>;
@@ -20,6 +22,8 @@ abstract class DataManipulationQueryManager {
       selectBuilder,
       deleteBuilder:
         props.deleteBuilder || new BaseDeleteBuilder(selectBuilder),
+      updateBuilder:
+        props.updateBuilder || new BaseUpdateBuilder(selectBuilder),
     };
   }
 
@@ -36,6 +40,12 @@ abstract class DataManipulationQueryManager {
     const selectQuery = this.queryBuilders.selectBuilder.getSelectSql(select);
 
     return await this.query<T>(selectQuery, Operation.Select);
+  }
+
+  async update<T>(props: UpdateProps): Promise<T[]> {
+    const updateQuery = this.queryBuilders.updateBuilder.getUpdateSql(props);
+
+    return await this.query<T>(updateQuery, Operation.Update);
   }
 
   async delete<T>(props: DeleteProps): Promise<T[]> {

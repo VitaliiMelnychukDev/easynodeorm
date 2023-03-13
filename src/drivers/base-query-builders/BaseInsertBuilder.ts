@@ -38,7 +38,13 @@ class BaseInsertBuilder implements InsertBuilder {
     return `${this.valueStatement} ${this.getRows(rowQueries)}`;
   }
 
-  checkProperties(rows: InsertBuilderRows): void {
+  checkProperties(tableName: string, rows: InsertBuilderRows): void {
+    if (!tableName) {
+      throw new WrongInsertQuery(
+        'Table name can not be empty for insert query',
+      );
+    }
+
     if (rows.length === 0) {
       throw new WrongInsertQuery(
         'Insert query should have at least one row to insert',
@@ -46,7 +52,7 @@ class BaseInsertBuilder implements InsertBuilder {
     }
 
     rows.forEach((row) => {
-      row.map((rowValue) => {
+      row.forEach((rowValue) => {
         if (!rowValue.name) {
           throw new WrongInsertQuery(
             'insert query column names can not be empty.',
@@ -62,7 +68,7 @@ class BaseInsertBuilder implements InsertBuilder {
   }
 
   getInsertSql(tableName: string, rows: InsertBuilderRows): string {
-    this.checkProperties(rows);
+    this.checkProperties(tableName, rows);
 
     return `${this.queryStatement} ${this.getTableName(
       tableName,
