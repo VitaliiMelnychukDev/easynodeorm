@@ -14,3 +14,22 @@ export type ColumnProps<AllowedTypes> = {
   enumTypeName?: string;
   isUnsigned?: boolean;
 };
+
+export type AddColumnProps<AllowedTypes> = Pick<
+  ColumnProps<AllowedTypes>,
+  | 'name'
+  | 'default'
+  | 'type'
+  | 'isUnsigned'
+  | 'isUnique'
+  | 'length'
+  | 'enum'
+  | 'enumTypeName'
+>;
+
+export type ChangeColumnType<AllowedTypes> = {
+  name: string;
+  newType: AllowedTypes;
+  length?: number;
+  usingPart?: string;
+};

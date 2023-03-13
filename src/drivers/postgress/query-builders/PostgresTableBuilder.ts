@@ -1,7 +1,7 @@
 import BaseTableBuilder from '../../base-query-builders/BaseTableBuilder';
 import { AllowedTypes } from '../types/types';
 import { ColumnProps } from '../../types/createTable';
-import WrongCreateQuery from '../../../error/WrongCreateQuery';
+import WrongTableQuery from '../../../error/WrongTableQuery';
 import TypeHelper from '../helpers/TypeHelper';
 
 class PostgresCreateTableBuilder extends BaseTableBuilder<AllowedTypes> {
@@ -11,7 +11,7 @@ class PostgresCreateTableBuilder extends BaseTableBuilder<AllowedTypes> {
   ): string {
     if (!isUnsigned) return '';
 
-    throw new WrongCreateQuery(
+    throw new WrongTableQuery(
       'Postgres does not support unsigned columns. Please use check statement instead.',
     );
   }
@@ -31,7 +31,7 @@ class PostgresCreateTableBuilder extends BaseTableBuilder<AllowedTypes> {
     }
 
     if (!column.enum?.length || !column.enumTypeName) {
-      throw new WrongCreateQuery(
+      throw new WrongTableQuery(
         'enum properties and enumTypeName should be specified for postgres enum type column.',
       );
     }

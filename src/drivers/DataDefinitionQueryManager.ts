@@ -1,7 +1,11 @@
 import { DataDefinitionQueryManagerProps } from './types/queryManager';
 import BaseTableBuilder from './base-query-builders/BaseTableBuilder';
-import { ColumnProps } from './types/createTable';
-import WrongCreateQuery from '../error/WrongCreateQuery';
+import {
+  AddColumnProps,
+  ChangeColumnType,
+  ColumnProps,
+  DefaultValueTypes,
+} from './types/createTable';
 import { Operation } from './consts/operation';
 import BaseForeignKeyBuilder from './base-query-builders/BaseForeignKeyBuilder';
 import { ForeignKey } from './types/foreignKey';
@@ -17,8 +21,7 @@ abstract class DataDefinitionQueryManager<AllowedTypes> {
 
   protected constructor(props: DataDefinitionQueryManagerProps<AllowedTypes>) {
     this.queryBuilders = {
-      createTableBuilder:
-        props.createTableBuilder || new BaseTableBuilder<AllowedTypes>(),
+      tableBuilder: props.tableBuilder || new BaseTableBuilder<AllowedTypes>(),
       foreignKeyBuilder: props.foreignKeyBuilder || new BaseForeignKeyBuilder(),
       indexBuilder: props.indexBuilder || new BaseIndexBuilder(),
     };
@@ -28,24 +31,17 @@ abstract class DataDefinitionQueryManager<AllowedTypes> {
     tableName: string,
     columnProps: ColumnProps<AllowedTypes>[],
   ): Promise<unknown> {
-    if (!columnProps.length) {
-      throw new WrongCreateQuery(
-        `Minimum one column required for table. Please specify columns for ${tableName} table`,
-      );
-    }
-
-    const createTableQuery =
-      this.queryBuilders.createTableBuilder.getCreateTableSql(
-        tableName,
-        columnProps,
-      );
+    const createTableQuery = this.queryBuilders.tableBuilder.getCreateTableSql(
+      tableName,
+      columnProps,
+    );
 
     return await this.query(createTableQuery, Operation.CreateTable);
   }
 
   async dropTable(tableName: string): Promise<unknown> {
     const dropTableQuery =
-      this.queryBuilders.createTableBuilder.getDropTableSql(tableName);
+      this.queryBuilders.tableBuilder.getDropTableSql(tableName);
 
     return await this.query(dropTableQuery, Operation.DropTable);
   }
@@ -82,6 +78,85 @@ abstract class DataDefinitionQueryManager<AllowedTypes> {
       this.queryBuilders.indexBuilder.getDropIndexSql(indexName);
 
     return await this.query(dropIndexQuery, Operation.DropIndex);
+  }
+
+  async addColumn(
+    tableName: string,
+    column: AddColumnProps<AllowedTypes>,
+  ): Promise<unknown> {
+    const addColumnSql = this.queryBuilders.tableBuilder.getAddColumnSql(
+      tableName,
+      column,
+    );
+
+    return await this.query(addColumnSql, Operation.AddColumn);
+  }
+
+  async dropColumn(tableName: string, columnName: string): Promise<unknown> {
+    const dropColumnSql = this.queryBuilders.tableBuilder.getDropColumnSql(
+      tableName,
+      columnName,
+    );
+
+    return await this.query(dropColumnSql, Operation.DropColumn);
+  }
+
+  async renameColumn(
+    tableName: string,
+    oldColumnName: string,
+    newColumnName: string,
+  ): Promise<unknown> {
+    const renameColumnSql = this.queryBuilders.tableBuilder.getRenameColumnSql(
+      tableName,
+      oldColumnName,
+      newColumnName,
+    );
+
+    return await this.query(renameColumnSql, Operation.RenameColumn);
+  }
+
+  async dropColumnDefaultValue(
+    tableName: string,
+    columnName: string,
+  ): Promise<unknown> {
+    const dropColumnDefaultValueSql =
+      this.queryBuilders.tableBuilder.getDropColumnDefaultValueSql(
+        tableName,
+        columnName,
+      );
+
+    return await this.query(
+      dropColumnDefaultValueSql,
+      Operation.DropColumnDefaultValue,
+    );
+  }
+
+  async setColumnDefaultValue(
+    tableName: string,
+    columnName: string,
+    defaultValue: DefaultValueTypes,
+  ): Promise<unknown> {
+    const setColumnDefaultValueSql =
+      this.queryBuilders.tableBuilder.getSetColumnDefaultValueSql(
+        tableName,
+        columnName,
+        defaultValue,
+      );
+
+    return await this.query(
+      setColumnDefaultValueSql,
+      Operation.SetColumnDefaultValue,
+    );
+  }
+
+  async changeColumnType(
+    tableName: string,
+    column: ChangeColumnType<AllowedTypes>,
+  ): Promise<unknown> {
+    const changeColumnTypeSql =
+      this.queryBuilders.tableBuilder.getChangeColumnTypeSql(tableName, column);
+
+    return await this.query(changeColumnTypeSql, Operation.ChangeColumnType);
   }
 }
 

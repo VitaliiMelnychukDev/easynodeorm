@@ -8,7 +8,7 @@ class DataDefinitionPostgresQueryManager extends DataDefinitionQueryManager<Allo
 
   public constructor(dbConnection: any) {
     super({
-      createTableBuilder: new PostgresCreateTableBuilder(),
+      tableBuilder: new PostgresCreateTableBuilder(),
     });
     this.dbConnection = dbConnection;
   }

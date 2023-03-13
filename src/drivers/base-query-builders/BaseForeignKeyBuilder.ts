@@ -1,5 +1,9 @@
 import { ForeignKey, ForeignKeyAction } from '../types/foreignKey';
-import { alterTableStatement } from '../consts/sqlStatements';
+import {
+  addConstraintStatement,
+  alterTableStatement,
+  dropConstrainStatement,
+} from '../consts/sqlStatements';
 import WrongForeignKeyQuery from '../../error/WrongForeignKeyQuery';
 import ForeignKeyBuilder from '../types/builders/ForeignKeyBuilder';
 
@@ -9,8 +13,8 @@ class BaseForeignKeyBuilder implements ForeignKeyBuilder {
   public referencesStatement = 'REFERENCES';
   public onDeleteStatement = 'ON DELETE';
   public onUpdateStatement = 'ON UPDATE';
-  public dropConstrainStatement = 'DROP CONSTRAINT';
-  public addConstraintStatement = 'ADD CONSTRAINT';
+  public dropConstrainStatement = dropConstrainStatement;
+  public addConstraintStatement = addConstraintStatement;
 
   getForeignKeyActionSql(foreignKeyAction: ForeignKeyAction): string {
     switch (foreignKeyAction) {

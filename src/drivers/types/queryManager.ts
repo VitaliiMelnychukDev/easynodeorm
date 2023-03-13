@@ -7,7 +7,7 @@ import DeleteBuilder from './builders/DeleteBuilder';
 import UpdateBuilder from './builders/UpdateBuilder';
 
 export type DataDefinitionQueryManagerProps<AllowedTypes> = {
-  createTableBuilder?: TableBuilder<AllowedTypes>;
+  tableBuilder?: TableBuilder<AllowedTypes>;
   foreignKeyBuilder?: ForeignKeyBuilder;
   indexBuilder?: IndexBuilder;
 };

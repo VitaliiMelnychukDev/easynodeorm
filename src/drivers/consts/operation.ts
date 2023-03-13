@@ -9,4 +9,10 @@ export enum Operation {
   DropForeignKey = 'DeleteForeignKey',
   CreateIndex = 'CreateIndex',
   DropIndex = 'DeleteIndex',
+  AddColumn = 'AddColumn',
+  DropColumn = 'DropColumn',
+  RenameColumn = 'RenameColumn',
+  DropColumnDefaultValue = 'DropColumnDefaultValue',
+  SetColumnDefaultValue = 'SetColumnDefaultValue',
+  ChangeColumnType = 'ChangeColumnType',
 }
