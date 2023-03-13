@@ -2,14 +2,10 @@ import { ObjectType } from '../../types/object';
 import { EntityDataStore } from '../../utils/entity-data';
 import { ColumnDecoratorProps } from '../../types/entity-data/decorators/column';
 
-const PrimaryAutoIncrement =
+const PrimaryKeyColumn =
   (customName?: ColumnDecoratorProps['customName']): PropertyDecorator =>
   (target: ObjectType, propertyKey: string | symbol): void => {
-    EntityDataStore.setPrimaryAutoIncrementColumn(
-      target,
-      propertyKey,
-      customName,
-    );
+    EntityDataStore.setPrimaryColumn(target, propertyKey, customName);
   };
 
-export default PrimaryAutoIncrement;
+export default PrimaryKeyColumn;

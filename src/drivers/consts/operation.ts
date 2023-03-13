@@ -4,9 +4,9 @@ export enum Operation {
   Select = 'Select',
   Delete = 'Delete',
   CreateTable = 'CreateTable',
-  DeleteTable = 'DeleteTable',
+  DropTable = 'DropTable',
   CreateForeignKey = 'CreateForeignKey',
-  DeleteForeignKey = 'DeleteForeignKey',
+  DropForeignKey = 'DeleteForeignKey',
   CreateIndex = 'CreateIndex',
-  DeleteIndex = 'DeleteIndex',
+  DropIndex = 'DeleteIndex',
 }

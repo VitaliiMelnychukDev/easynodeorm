@@ -18,6 +18,8 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
 
   public createTableStatement = 'CREATE TABLE IF NOT EXISTS';
 
+  public dropTableStatement = 'DROP TABLE IF EXISTS';
+
   public primaryKeyStatement = 'PRIMARY KEY';
 
   public uniqueStatement = 'UNIQUE';
@@ -146,6 +148,10 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
     ].join(',')})`;
 
     return `${this.getBeforeSqlQueries()} ${mainQuery}`;
+  }
+
+  public getDropTableSql(tableName: string): string {
+    return `${this.dropTableStatement} ${tableName}`;
   }
 }
 

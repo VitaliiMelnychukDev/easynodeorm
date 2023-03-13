@@ -18,18 +18,19 @@ abstract class DataManipulationQueryManager {
   }
 
   async insert<T>(tableName: string, rows: InsertBuilderRows): Promise<T[]> {
-    const query = this.queryBuilders.insertBuilder.getInsertSql(
+    const insertQuery = this.queryBuilders.insertBuilder.getInsertSql(
       tableName,
       rows,
     );
 
-    return await this.query<T>(query, Operation.Insert);
+    return await this.query<T>(insertQuery, Operation.Insert);
   }
 
   async select<T>(select: Select): Promise<T[]> {
-    const query = this.queryBuilders.selectBuilder.getSelectSql(select);
+    const selectQuery = this.queryBuilders.selectBuilder.getSelectSql(select);
 
-    return await this.query<T>(query, Operation.Select);
+    console.log('Select QUery: ', selectQuery);
+    return await this.query<T>(selectQuery, Operation.Select);
   }
 }
 
