@@ -30,11 +30,12 @@ import { AllowedTypesToMakeQueryWith } from '../../types/global';
 import { Order, OrderBy } from '../types/order';
 import { Join, JoinVariant } from '../types/join';
 import SelectBuilder from '../types/builders/SelectBuilder';
+import { fromStatement } from '../consts/sqlStatements';
 
 class BaseSelectBuilder implements SelectBuilder {
   public distinctStatement = 'DISTINCT';
   public selectStatement = 'SELECT';
-  public fromStatement = 'FROM';
+  public fromStatement = fromStatement;
   public whereStatement = 'WHERE';
   public groupByStatement = 'GROUP BY';
   public havingStatement = 'HAVING';
@@ -46,6 +47,12 @@ class BaseSelectBuilder implements SelectBuilder {
     return alias ? `AS ${alias}` : '';
   }
   getRequiredAlias(aliesObj: RequiredAlias): string {
+    if (!aliesObj.name) {
+      throw new WrongSelectQuery(
+        'Select Query: column ot table name can not be empty',
+      );
+    }
+
     return `${aliesObj.name} ${this.getAliasPart(aliesObj.alias)}`;
   }
   getTableName(table: Table): string {
@@ -57,6 +64,10 @@ class BaseSelectBuilder implements SelectBuilder {
 
     if (isRequiredAlias(table)) {
       return this.getRequiredAlias(table);
+    }
+
+    if (!table) {
+      throw new WrongSelectQuery('Select Query: table name can not be empty');
     }
 
     return table;
@@ -71,6 +82,12 @@ class BaseSelectBuilder implements SelectBuilder {
   }
 
   getColumnWithAggregationMethod(aggregationColumn: AggregationColumn): string {
+    if (!aggregationColumn.aggregationMethod) {
+      throw new WrongSelectQuery(
+        'Select Query: aggregationMethod can not be empty',
+      );
+    }
+
     return `${aggregationColumn.aggregationMethod}(${
       aggregationColumn.name
     }) ${this.getAliasPart(aggregationColumn.alias)}`;
@@ -87,6 +104,10 @@ class BaseSelectBuilder implements SelectBuilder {
 
     if (isRequiredAlias(column)) {
       return this.getRequiredAlias(column);
+    }
+
+    if (!column) {
+      throw new WrongSelectQuery('Select Query: column name can not be empty');
     }
 
     return column;
@@ -133,7 +154,9 @@ class BaseSelectBuilder implements SelectBuilder {
       case 'in':
         return 'IN';
       default:
-        throw new WrongSelectQuery(`operator ${operation} is not supported`);
+        throw new WrongSelectQuery(
+          `Select Query: operator ${operation} is not supported`,
+        );
     }
   }
 
@@ -191,7 +214,9 @@ class BaseSelectBuilder implements SelectBuilder {
     }
 
     if (Array.isArray(values) && !values.length) {
-      throw new WrongSelectQuery('In operator can not have empty array.');
+      throw new WrongSelectQuery(
+        'Select Query: In operator can not have empty array.',
+      );
     }
 
     return this.getInCondition(column, sqlOperator, values);
@@ -271,7 +296,7 @@ class BaseSelectBuilder implements SelectBuilder {
       : wrappedConditionParts;
   }
 
-  getWhere(where?: Where): string {
+  getWhereSql(where?: Where): string {
     return where
       ? `${this.whereStatement} ${this.getWhereConditions(where)}`
       : '';
@@ -284,17 +309,41 @@ class BaseSelectBuilder implements SelectBuilder {
   }
 
   getGroupBy(columns?: string[]): string {
+    columns.forEach((column) => {
+      if (column) {
+        throw new WrongSelectQuery(
+          'Select Query: group by can not have empty column',
+        );
+      }
+    });
+
     return columns?.length
       ? `${this.groupByStatement} ${columns.join(',')}`
       : '';
   }
 
   getLimit(limit?: number): string {
-    return limit ? `${this.limitStatement} ${limit}` : '';
+    if (!limit) return '';
+
+    if (limit < 0 || !Number.isInteger(limit)) {
+      throw new WrongSelectQuery(
+        'Select Query: Limit should be positive integer',
+      );
+    }
+
+    return `${this.limitStatement} ${limit}`;
   }
 
   getOffset(offset?: number): string {
-    return offset ? `${this.offsetStatement} ${offset}` : '';
+    if (!offset) return '';
+
+    if (offset < 0 || !Number.isInteger(offset)) {
+      throw new WrongSelectQuery(
+        'Select Query: Offset should be positive integer',
+      );
+    }
+
+    return `${this.offsetStatement} ${offset}`;
   }
 
   getSqlOrder(order: Order): string {
@@ -310,7 +359,14 @@ class BaseSelectBuilder implements SelectBuilder {
     if (!orderByOptions?.length) return '';
 
     const orderBySqlParts = orderByOptions.map((orderBy) => {
+      if (!orderBy.column) {
+        throw new WrongSelectQuery(
+          'Select Query: order can not have empty column',
+        );
+      }
+
       const orderSql = orderBy.order ? this.getSqlOrder(orderBy.order) : '';
+
       return `${orderBy.column} ${orderSql}`;
     });
 
@@ -335,6 +391,12 @@ class BaseSelectBuilder implements SelectBuilder {
 
     return joins
       .map((join) => {
+        if (!join.table || !join.on.column || !join.on.joinTableColumn) {
+          throw new WrongSelectQuery(
+            'Select Query: join can not have empty table, on.column or on.joinTableColumn values',
+          );
+        }
+
         return `${this.getSqlJoin(join.type)} ${this.getTableName(
           join.table,
         )} ON ${join.on.column} = ${join.on.joinTableColumn}`;
@@ -345,7 +407,7 @@ class BaseSelectBuilder implements SelectBuilder {
   validateSelectOptions(options: Select): void {
     if (options.having && !options.groupBy?.length) {
       throw new WrongSelectQuery(
-        'Having part of select request can not work without groupBy. Please specify both.',
+        'Select Query: Having part of select request can not work without groupBy. Please specify both.',
       );
     }
   }
@@ -355,7 +417,7 @@ class BaseSelectBuilder implements SelectBuilder {
     const tableNameSql = this.getTableName(options.table);
     const columnsSql = this.getColumns(options.columns);
     const joinsSql = this.getJoins(options.joins);
-    const whereSql = this.getWhere(options.where);
+    const whereSql = this.getWhereSql(options.where);
     const groupBySql = this.getGroupBy(options.groupBy);
     const havingSql = this.getHaving(options.having);
     const orderBySql = this.getOrderBy(options.order);

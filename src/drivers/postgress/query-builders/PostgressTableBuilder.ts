@@ -1,8 +1,8 @@
-import BaseTableBuilder from '../base-query-builders/BaseTableBuilder';
-import { AllowedTypes } from './types/types';
-import { ColumnProps } from '../types/createTable';
-import WrongCreateQuery from '../../error/WrongCreateQuery';
-import TypeHelper from './helpers/TypeHelper';
+import BaseTableBuilder from '../../base-query-builders/BaseTableBuilder';
+import { AllowedTypes } from '../types/types';
+import { ColumnProps } from '../../types/createTable';
+import WrongCreateQuery from '../../../error/WrongCreateQuery';
+import TypeHelper from '../helpers/TypeHelper';
 
 class PostgresCreateTableBuilder extends BaseTableBuilder<AllowedTypes> {
   public getUnsignedPart(

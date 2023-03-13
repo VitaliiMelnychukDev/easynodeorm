@@ -44,6 +44,16 @@ class BaseInsertBuilder implements InsertBuilder {
         'Insert query should have at least one row to insert',
       );
     }
+
+    rows.forEach((row) => {
+      row.map((rowValue) => {
+        if (!rowValue.name) {
+          throw new WrongInsertQuery(
+            'insert query column names can not be empty.',
+          );
+        }
+      });
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

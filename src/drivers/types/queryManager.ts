@@ -3,6 +3,7 @@ import TableBuilder from './builders/TableBuilder';
 import SelectBuilder from './builders/SelectBuilder';
 import ForeignKeyBuilder from './builders/ForeignKeyBuilder';
 import IndexBuilder from './builders/IndexBuilder';
+import DeleteBuilder from './builders/DeleteBuilder';
 
 export type DataDefinitionQueryManagerProps<AllowedTypes> = {
   createTableBuilder?: TableBuilder<AllowedTypes>;
@@ -13,4 +14,5 @@ export type DataDefinitionQueryManagerProps<AllowedTypes> = {
 export type DataManipulationQueryManagerProps = {
   insertBuilder?: InsertBuilder;
   selectBuilder?: SelectBuilder;
+  deleteBuilder?: DeleteBuilder;
 };

@@ -1,7 +1,7 @@
 import { PostgresConnection } from './types/connection';
 import DataDefinitionQueryManager from '../DataDefinitionQueryManager';
 import { AllowedTypes } from './types/types';
-import PostgresCreateTableBuilder from './PostgressCreateTableBuilder';
+import PostgresCreateTableBuilder from './query-builders/PostgressTableBuilder';
 
 class DataDefinitionPostgresQueryManager extends DataDefinitionQueryManager<AllowedTypes> {
   protected readonly dbConnection: PostgresConnection;
