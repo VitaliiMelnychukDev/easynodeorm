@@ -4,6 +4,9 @@ import {
   Length,
   PrimaryAutoIncrementColumn,
 } from '../../decorators';
+import OneToOne from '../../decorators/relations/OneToOne';
+import User from './User';
+import { EntityRelationFieldLocation } from '../../types/entity-data/relations';
 
 @Entity('addresses')
 class Address {
@@ -27,6 +30,13 @@ class Address {
   @Length(1000)
   @Column()
   address: string;
+
+  @OneToOne({
+    relatedField: 'addressId',
+    getRelatedEntity: () => User,
+    fieldLocation: EntityRelationFieldLocation.RelatedEntity,
+  })
+  user: User;
 }
 
 export default Address;

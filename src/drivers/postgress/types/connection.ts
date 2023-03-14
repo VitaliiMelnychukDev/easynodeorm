@@ -1,8 +1,16 @@
 import { QueryResult } from './query';
 
-export interface PostgresConnection {
-  query<T>(query: string): QueryResult<T>;
-}
+export type PostgresClient = BaseConnectionMethods & {
+  release(): Promise<void>;
+};
+export type PostgresPoolConnection = BaseConnectionMethods & {
+  connect(): Promise<PostgresClient>;
+};
+
+export type BaseConnectionMethods = {
+  query<T>(query: string): Promise<QueryResult<T>>;
+};
+
 export default interface PostgresConnectionParams {
   host: string;
   user: string;

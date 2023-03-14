@@ -1,4 +1,4 @@
-export type SupportedDatabases = 'postgres' | 'mysql';
+export type SupportedDatabases = 'postgres';
 
 export type AllowedTypes = string | boolean | number | null | undefined;
 

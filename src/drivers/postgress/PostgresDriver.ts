@@ -1,15 +1,16 @@
-import SQLBaseDriver from '../SQLBaseDriver';
 import { ConnectionOptions } from '../../types/connection';
 import ConnectionHelper from './helpers/Connection';
 import PostgresQueryManager from './PostgresQueryManager';
-import { PostgresConnection } from './types/connection';
+import { PostgresPoolConnection } from './types/connection';
 import BaseRepository from '../BaseRepository';
 import { PropertyClassType } from '../../types/object';
 import { AllowedTypes } from './types/types';
 import DataDefinitionPostgresQueryManager from './DataDefinitionPostgresQueryManager';
+import SqlBaseDriver from '../SqlBaseDriver';
+import PostgresSeparateConnectionManager from './PostgresSeparateConnectionManager';
 
-class PostgresDriver extends SQLBaseDriver<AllowedTypes> {
-  private readonly dbConnection: PostgresConnection;
+class PostgresDriver extends SqlBaseDriver<AllowedTypes> {
+  private readonly dbConnection: PostgresPoolConnection;
 
   public readonly queryManager: PostgresQueryManager;
 
@@ -18,7 +19,7 @@ class PostgresDriver extends SQLBaseDriver<AllowedTypes> {
   public constructor(options: ConnectionOptions) {
     super();
 
-    const driver: any = SQLBaseDriver.getDriver(options.name);
+    const driver: any = SqlBaseDriver.getDriver(options.name);
 
     this.dbConnection = new driver.Pool(
       ConnectionHelper.mapToConnectionObject(options),
@@ -34,6 +35,12 @@ class PostgresDriver extends SQLBaseDriver<AllowedTypes> {
     entityClass: PropertyClassType<Entity>,
   ): BaseRepository<Entity> {
     return new BaseRepository<Entity>(this.queryManager, entityClass);
+  }
+
+  async getSeparateConnection(): Promise<PostgresSeparateConnectionManager> {
+    const connection = await this.dbConnection.connect();
+
+    return new PostgresSeparateConnectionManager(connection);
   }
 }
 

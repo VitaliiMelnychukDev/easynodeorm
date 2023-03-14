@@ -6,10 +6,8 @@ class DriverLoader {
     switch (dbName) {
       case 'postgres':
         return require('pg');
-      case 'mysql':
-        return require('mysql');
       default:
-        throw new Error('Only postgres and mysql databases are supported');
+        throw new Error('Only postgres database is supported');
     }
   }
 }

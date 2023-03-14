@@ -1,11 +1,9 @@
-import { SupportedDatabases } from '../types/global';
-import DriverLoader from './DriverLoader';
 import DataManipulationQueryManager from './DataManipulationQueryManager';
 import BaseRepository from './BaseRepository';
 import { PropertyClassType } from '../types/object';
 import DataDefinitionQueryManager from './DataDefinitionQueryManager';
 
-abstract class SQLBaseDriver<AllowedTypes> {
+abstract class SQLBaseEntity<AllowedTypes> {
   abstract readonly queryManager: DataManipulationQueryManager;
 
   abstract readonly dataDefinitionQueryManager: DataDefinitionQueryManager<AllowedTypes>;
@@ -13,10 +11,6 @@ abstract class SQLBaseDriver<AllowedTypes> {
   abstract getRepository<Entity>(
     entityClass: PropertyClassType<Entity>,
   ): BaseRepository<Entity>;
-
-  static getDriver(dbName: SupportedDatabases): any {
-    return DriverLoader.load(dbName);
-  }
 
   getCustomRepository<Entity, CustomRepository extends BaseRepository<Entity>>(
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -29,4 +23,4 @@ abstract class SQLBaseDriver<AllowedTypes> {
   }
 }
 
-export default SQLBaseDriver;
+export default SQLBaseEntity;

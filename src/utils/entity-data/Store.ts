@@ -4,10 +4,12 @@ import {
   EntityData,
   EntityDataStoreKeyType,
   EntityDataStoreType,
+  EntityRelation,
 } from '../../types/entity-data/entity';
 import { ObjectType, PropertyClassType } from '../../types/object';
 import WrongEntityError from '../../error/WrongEntityError';
 import { ColumnDecoratorProps } from '../../types/entity-data/decorators/column';
+import { RelationType } from '../../types/entity-data/relations';
 
 class Store {
   private static readonly entityDataStore: EntityDataStoreType = new Map<
@@ -20,13 +22,14 @@ class Store {
     decoratorKey,
     decoratorProps,
   }: SetPropertyValidationProps): void {
-    if (typeof propertyKey !== 'string') return;
+    const propertyKeyName =
+      Store.validateAndReturnStringPropertyKey(propertyKey);
     const entityData = Store.getExistedEntityDataOrCreate(target);
 
-    const propertyValidations = entityData.validations.has(propertyKey)
-      ? entityData.validations.get(propertyKey)
+    const propertyValidations = entityData.validations.has(propertyKeyName)
+      ? entityData.validations.get(propertyKeyName)
       : {};
-    entityData.validations.set(propertyKey, {
+    entityData.validations.set(propertyKeyName, {
       ...propertyValidations,
       [decoratorKey]: decoratorProps,
     });
@@ -36,6 +39,7 @@ class Store {
     target: ObjectType,
     tableName: string,
   ): void {
+    if (!tableName) return;
     const entityData = Store.getExistedEntityDataOrCreate(target);
 
     entityData.tableName = tableName;
@@ -46,10 +50,11 @@ class Store {
     propertyKey: string | symbol,
     columnProperties: ColumnDecoratorProps,
   ): void {
-    if (typeof propertyKey !== 'string') return;
+    const propertyKeyName =
+      Store.validateAndReturnStringPropertyKey(propertyKey);
     const entityData = Store.getExistedEntityDataOrCreate(target);
 
-    entityData.columns.push(propertyKey);
+    entityData.columns.push(propertyKeyName);
 
     if (
       !columnProperties.customName &&
@@ -60,7 +65,7 @@ class Store {
     const columnsData: ColumnData = {
       ...(columnProperties.customName && {
         customName: {
-          propertyName: propertyKey,
+          propertyName: propertyKeyName,
           columnName: columnProperties.customName,
         },
       }),
@@ -69,7 +74,7 @@ class Store {
       }),
     };
 
-    entityData.columnsData.set(propertyKey, columnsData);
+    entityData.columnsData.set(propertyKeyName, columnsData);
   }
 
   public static setPrimaryColumn(
@@ -77,17 +82,18 @@ class Store {
     propertyKey: string | symbol,
     customName?: ColumnDecoratorProps['customName'],
   ): void {
-    if (typeof propertyKey !== 'string') return;
+    const propertyKeyName =
+      Store.validateAndReturnStringPropertyKey(propertyKey);
     const entityData = Store.getExistedEntityDataOrCreate(target);
 
-    if (!entityData.primaryColumns.includes(propertyKey)) {
-      entityData.primaryColumns.push(propertyKey);
+    if (!entityData.primaryColumns.includes(propertyKeyName)) {
+      entityData.primaryColumns.push(propertyKeyName);
     }
 
     if (customName) {
-      entityData.columnsData.set(propertyKey, {
+      entityData.columnsData.set(propertyKeyName, {
         customName: {
-          propertyName: propertyKey,
+          propertyName: propertyKeyName,
           columnName: customName,
         },
       });
@@ -99,11 +105,41 @@ class Store {
     propertyKey: string | symbol,
     customName?: ColumnDecoratorProps['customName'],
   ): void {
-    if (typeof propertyKey !== 'string') return;
+    const propertyKeyName =
+      Store.validateAndReturnStringPropertyKey(propertyKey);
     const entityData = Store.getExistedEntityDataOrCreate(target);
 
-    entityData.autoIncrementColumn = propertyKey;
-    Store.setPrimaryColumn(target, propertyKey, customName);
+    entityData.autoIncrementColumn = propertyKeyName;
+    Store.setPrimaryColumn(target, propertyKeyName, customName);
+  }
+
+  public static setRelation(
+    target: ObjectType,
+    propertyKey: string | symbol,
+    relationsData: EntityRelation,
+  ): void {
+    const propertyKeyName =
+      Store.validateAndReturnStringPropertyKey(propertyKey);
+    const entityData = Store.getExistedEntityDataOrCreate(target);
+    if (
+      relationsData.relationType !== RelationType.ManyToMany &&
+      !relationsData.relatedField
+    ) {
+      throw new WrongEntityError(
+        `Entity field ${propertyKeyName}: relation field can not be empty for oneToOne, oneToMany or ManyToOne relation`,
+      );
+    }
+
+    if (
+      relationsData.relationType === RelationType.ManyToMany &&
+      !relationsData.intermediateTable
+    ) {
+      throw new WrongEntityError(
+        `Entity field ${propertyKeyName}: intermediateTableName field can not be empty for ManyToMany relation`,
+      );
+    }
+
+    entityData.relations[propertyKeyName] = relationsData;
   }
 
   public static getEntityDataByFunction(
@@ -125,6 +161,18 @@ class Store {
     }
 
     return entityData;
+  }
+
+  private static validateAndReturnStringPropertyKey(
+    propertyKey: string | symbol,
+  ): string {
+    if (typeof propertyKey !== 'string' || !propertyKey) {
+      throw new WrongEntityError(
+        `Entity propertyKey should be string and not can not empty`,
+      );
+    }
+
+    return propertyKey;
   }
 
   private static getExistedEntityDataOrCreate(target: ObjectType): EntityData {

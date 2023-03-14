@@ -7,6 +7,12 @@ import {
   Length,
   PrimaryAutoIncrementColumn,
 } from '../../decorators';
+import Address from './Address';
+import OneToOne from '../../decorators/relations/OneToOne';
+import OneToMany from '../../decorators/relations/OneToMany';
+import Product from './Product';
+import ManyToMany from '../../decorators/relations/ManyToMany';
+import Tag from './Tag';
 
 export enum Role {
   Admin = 'Admin',
@@ -47,6 +53,30 @@ class User {
   @Enum([Role.Admin, Role.Customer])
   @Column()
   role: Role;
+
+  @OneToOne({
+    relatedField: 'addressId',
+    getRelatedEntity: () => Address,
+  })
+  address: Address;
+
+  @OneToMany({
+    relatedEntityField: 'userId',
+    getRelatedEntity: () => Product,
+  })
+  products: Product[];
+
+  @ManyToMany({
+    getRelatedEntity: () => Tag,
+    intermediateTable: {
+      name: 'user_tags',
+      fieldNames: {
+        currentEntity: 'user_id',
+        relatedEntity: 'tag_id',
+      },
+    },
+  })
+  tags: Tag[];
 }
 
 export default User;
