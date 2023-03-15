@@ -5,7 +5,7 @@ import { returningAllAfterAction } from '../constants/sqlStatements';
 class PostgresDeleteBuilder extends BaseDeleteBuilder {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   afterDeleteSql(props: DeleteProps<string>): string {
-    return returningAllAfterAction;
+    return props.returnDeletedRows ? returningAllAfterAction : '';
   }
 }
 

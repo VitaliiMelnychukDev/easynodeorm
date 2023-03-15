@@ -125,6 +125,31 @@ class BaseRepository<Entity> {
     return entity;
   }
 
+  async delete(
+    where: Where<keyof Entity>,
+    returnDeleted = false,
+  ): Promise<Entity[]> {
+    const entityData = EntityDataManager.validateAndGetTableAndColumnsData(
+      this.entityClass,
+    );
+
+    const transformedWhereToSelect =
+      EntityDataTransformer.prepareWhereBeforeRequest(where, entityData);
+
+    const entities = await this.queryManager.delete({
+      tableName: entityData.tableName,
+      where: transformedWhereToSelect,
+      returnDeletedRows: returnDeleted,
+    });
+
+    return returnDeleted
+      ? EntityDataTransformer.transformArrayToEntities(
+          entities,
+          this.entityClass,
+        )
+      : [];
+  }
+
   private async populateOneToRelations(
     entity: Entity,
     entityRelationFieldName: string,
@@ -193,14 +218,14 @@ class BaseRepository<Entity> {
     where: Where<string>,
     entityClass: PropertyClassType<T>,
   ): Promise<T[]> {
-    const data =
+    const entityData =
       EntityDataManager.validateAndGetTableAndColumnsData(entityClass);
 
     const transformedWhereToSelect =
-      EntityDataTransformer.prepareWhereBeforeRequest(where, data);
+      EntityDataTransformer.prepareWhereBeforeRequest(where, entityData);
 
     const entities = await this.queryManager.select({
-      table: data.tableName,
+      table: entityData.tableName,
       where: transformedWhereToSelect,
     });
 

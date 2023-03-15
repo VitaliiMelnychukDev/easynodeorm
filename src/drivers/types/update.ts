@@ -6,4 +6,5 @@ export type UpdateProps<ColumnNames extends PropertyKeyTypes> = {
   tableName: string;
   where: Where<ColumnNames>;
   columns: ColumnDataToHandel[];
+  returnUpdatedRows?: boolean;
 };
