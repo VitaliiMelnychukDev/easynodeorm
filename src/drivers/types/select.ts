@@ -18,5 +18,5 @@ export type Select<ColumnNames extends PropertyKeyTypes> = {
 };
 
 export const isSelect = (select: any): select is Select<string> => {
-  return typeof select === 'object' && select.table !== undefined;
+  return typeof select === 'object' && select && select.table !== undefined;
 };

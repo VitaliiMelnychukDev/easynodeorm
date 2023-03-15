@@ -45,3 +45,8 @@ export const isDecoratorData = <T>(
 ): decoratorValue is DecoratorData<T> => {
   return (<DecoratorData<T>>decoratorValue).props !== undefined;
 };
+
+export enum Operation {
+  Update = 'Update',
+  Insert = 'Insert',
+}

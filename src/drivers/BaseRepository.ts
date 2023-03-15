@@ -13,6 +13,8 @@ import WrongEntityToInsert from '../error/WrongEntityToInsert';
 import { EntityRelation } from '../types/entity-data/entity';
 import { Where } from './types/where';
 import { JoinVariant } from './types/join';
+import { UpdateEntity, WithRelations } from './types/repository';
+import WrongEntityError from '../error/WrongEntityError';
 
 class BaseRepository<Entity> {
   protected readonly queryManager: DataManipulationQueryManager;
@@ -28,7 +30,7 @@ class BaseRepository<Entity> {
   }
   async create(
     entity: Entity,
-    withRelations: (keyof Entity | 'all')[] = [],
+    withRelations: WithRelations<Entity>[] = [],
   ): Promise<Entity> {
     let entityToReturn = entity;
     const relations = EntityDataManager.validateAndGetRelation(
@@ -94,9 +96,15 @@ class BaseRepository<Entity> {
     return await this.selectByWhere(where, this.entityClass);
   }
 
+  async getOne(where: Where<keyof Entity>): Promise<Entity | null> {
+    const entities = await this.selectByWhere(where, this.entityClass);
+
+    return entities.length ? entities[0] : null;
+  }
+
   async populate(
     entity: Entity,
-    withRelations: (keyof Entity | 'all')[] = [],
+    withRelations: WithRelations<Entity>[] = [],
   ): Promise<Entity> {
     const relations = EntityDataManager.validateAndGetRelation(
       this.entityClass,
@@ -125,6 +133,92 @@ class BaseRepository<Entity> {
     return entity;
   }
 
+  async updateEntity(
+    entity: Entity,
+    withRelations: WithRelations<Entity>[] = [],
+  ): Promise<Entity> {
+    const entityData = EntityDataManager.validateAndGetTableAndColumnsData(
+      this.entityClass,
+    );
+
+    const updatedData: UpdateEntity<Entity> = {};
+
+    entityData.columns.forEach((column) => {
+      updatedData[column] = entity[column];
+    });
+
+    const wherePart = this.getPrimaryKeysWherePart(entity, this.entityClass);
+
+    const updatedEntities = await this.update(updatedData, wherePart, true);
+    if (!updatedEntities.length) {
+      throw new WrongQueryResult(
+        'Something went wrong in process of updating data',
+      );
+    }
+    const updatedEntity = updatedEntities[0];
+    const relations = EntityDataManager.validateAndGetRelation(
+      this.entityClass,
+      entity,
+    );
+
+    const relationsToHandle = this.getRelationNamesToHandle(
+      relations,
+      withRelations,
+    );
+
+    for (const relationToHandle of relationsToHandle) {
+      const relation = relations[relationToHandle];
+      if (relation.relationType === RelationType.ManyToMany) {
+        await this.handleAndInsertManyToManyRelatedEntities(
+          entity,
+          relationToHandle,
+          relation,
+          true,
+        );
+        await this.populateManyToManyRelation(
+          updatedEntity,
+          relationToHandle,
+          relation,
+        );
+      }
+    }
+
+    return updatedEntity;
+  }
+
+  async update(
+    updatedFields: UpdateEntity<Entity>,
+    where: Where<keyof Entity>,
+    returnUpdated = false,
+  ): Promise<Entity[]> {
+    const entityData = EntityDataManager.validateAndGetTableAndColumnsData(
+      this.entityClass,
+    );
+
+    const entities = await this.queryManager.update({
+      tableName: entityData.tableName,
+      where: EntityDataTransformer.prepareWhereBeforeRequest(where, entityData),
+      columns: EntityDataManager.validateAndGetColumnsPreparedData(
+        this.entityClass,
+        updatedFields,
+      ),
+      returnUpdatedRows: returnUpdated,
+    });
+
+    return returnUpdated
+      ? EntityDataTransformer.transformArrayToEntities(
+          entities,
+          this.entityClass,
+        )
+      : [];
+  }
+
+  async deleteEntity(entity: Entity): Promise<void> {
+    const wherePart = this.getPrimaryKeysWherePart(entity, this.entityClass);
+
+    await this.delete(wherePart);
+  }
+
   async delete(
     where: Where<keyof Entity>,
     returnDeleted = false,
@@ -133,12 +227,9 @@ class BaseRepository<Entity> {
       this.entityClass,
     );
 
-    const transformedWhereToSelect =
-      EntityDataTransformer.prepareWhereBeforeRequest(where, entityData);
-
     const entities = await this.queryManager.delete({
       tableName: entityData.tableName,
-      where: transformedWhereToSelect,
+      where: EntityDataTransformer.prepareWhereBeforeRequest(where, entityData),
       returnDeletedRows: returnDeleted,
     });
 
@@ -148,6 +239,27 @@ class BaseRepository<Entity> {
           this.entityClass,
         )
       : [];
+  }
+
+  private getPrimaryKeysWherePart<Entity>(
+    entity: Entity,
+    entityClass: PropertyClassType<Entity>,
+  ): Where<keyof Entity> {
+    const entityData =
+      EntityDataManager.validateAndGetTableAndColumnsData(entityClass);
+
+    const where: Where<keyof Entity> = {};
+    entityData.primaryColumns.forEach((primaryColumn) => {
+      if (!entity[primaryColumn]) {
+        throw new WrongEntityError(
+          `entity primaryColumn ${primaryColumn} can not be empty`,
+        );
+      }
+
+      where[primaryColumn] = entity[primaryColumn];
+    });
+
+    return where;
   }
 
   private async populateOneToRelations(
@@ -237,7 +349,7 @@ class BaseRepository<Entity> {
 
   private getRelationNamesToHandle(
     relations: Record<string, EntityRelation>,
-    withRelations: (keyof Entity | 'all')[] = [],
+    withRelations: WithRelations<Entity>[] = [],
   ): string[] {
     const relationKeys = Object.keys(relations);
 
@@ -311,6 +423,7 @@ class BaseRepository<Entity> {
     entity: T,
     entityRelationFieldName: string,
     relation: EntityRelation,
+    removeExisted = false,
   ): Promise<void> {
     if (!entity[entityRelationFieldName]) {
       throw new WrongEntityToInsert(
@@ -358,6 +471,16 @@ class BaseRepository<Entity> {
       },
     );
 
+    if (removeExisted) {
+      await this.queryManager.delete({
+        tableName: relation.intermediateTable.name,
+        where: {
+          [relation.intermediateTable.fieldNames.currentTableIntermediateField]:
+            entityId,
+        },
+      });
+    }
+
     await this.insertData(relation.intermediateTable.name, propertiesToInsert);
   }
 
@@ -370,7 +493,7 @@ class BaseRepository<Entity> {
     let tableName = '';
     const properties: InsertBuilderRows = [];
     entity.forEach((entity: T) => {
-      const insertData = EntityDataManager.validateAndGetEntityData(
+      const insertData = EntityDataManager.validateAndGetDataForOperation(
         entityClass,
         entity,
       );

@@ -8,6 +8,7 @@ import {
 } from '../../types/entity-data/entity';
 import { EntityDataStore } from './index';
 import { ColumnData } from '../../types/entity-data/column';
+import { Operation } from '../../types/entity-data/validation';
 
 class Provider {
   private readonly entity: ObjectType;
@@ -23,12 +24,18 @@ class Provider {
     this.entity = entity;
   }
 
-  getEntityData(): PreparedEntityData {
+  getEntityData(operation: Operation): PreparedEntityData {
     return {
       tableName: this.getTableName(),
-      columns: this.getColumns(),
+      columns: this.getColumns(operation),
     };
   }
+
+  getPreparedColumns(columns: string[]): ColumnDataToHandel[] {
+    return this.prepareColumns(columns);
+  }
+
+  getC;
 
   getRelationsData(): Record<string, EntityRelation> {
     return this.entityData.relations;
@@ -48,15 +55,22 @@ class Provider {
       this.entityData.tableName || this.entity.constructor.name.toLowerCase()
     );
   }
-  private getColumns(): ColumnDataToHandel[] {
+  private getColumns(operation: Operation): ColumnDataToHandel[] {
     const columnsToSet: string[] = [...this.entityData.columns];
-    this.entityData.primaryColumns.forEach((primaryColumn: string) => {
-      if (this.entityData.autoIncrementColumn !== primaryColumn) {
-        columnsToSet.push(primaryColumn);
-      }
-    });
 
-    return columnsToSet.map((column: string) => {
+    if (operation === Operation.Insert) {
+      this.entityData.primaryColumns.forEach((primaryColumn: string) => {
+        if (this.entityData.autoIncrementColumn !== primaryColumn) {
+          columnsToSet.push(primaryColumn);
+        }
+      });
+    }
+
+    return this.prepareColumns(columnsToSet);
+  }
+
+  private prepareColumns(columnsList: string[]): ColumnDataToHandel[] {
+    return columnsList.map((column: string) => {
       const columnData = this.entityData.columnsData.get(column);
 
       return {

@@ -11,4 +11,7 @@ const testDelete = async (): Promise<void> => {
     },
     true,
   );
+
+  const products = await productRepository.get({ id: 29 });
+  return await productRepository.deleteEntity(products[0]);
 };

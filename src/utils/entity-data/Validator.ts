@@ -2,7 +2,7 @@ import { EntityData, EntityRelation } from '../../types/entity-data/entity';
 import WrongEntityError from '../../error/WrongEntityError';
 import WrongPropertyError from '../../error/WrongPropertyError';
 import ObjectHelper from '../../helpers/ObjectHelper';
-import { isDecoratorData } from '../../types/entity-data/validation';
+import { isDecoratorData, Operation } from '../../types/entity-data/validation';
 import { MessageCode } from '../../consts/message';
 import {
   ObjectType,
@@ -16,6 +16,8 @@ class Validator {
   private readonly entity: ObjectType;
   private readonly entityData: EntityData;
   private readonly entityClassName: string;
+
+  private validateOperation: Operation = Operation.Insert;
   private readonly propertyValidationErrors: ObjectWithPropertyTypesStringArray =
     {};
   constructor(
@@ -30,13 +32,38 @@ class Validator {
     this.entityClassName = entity.constructor.name;
   }
 
-  public validate(): void {
+  public validate(validateOperation = Operation.Insert): void {
+    this.validateOperation = validateOperation;
     this.validateTableName();
     this.validateAutoIncrement();
     this.validatePrimaryColumn();
     this.validateColumns();
     this.validaRelations();
     this.validateEntityValues();
+  }
+
+  public validateProperties(columnNames: string[]): void {
+    console.log('entityColumns: ', columnNames);
+    this.validateOperation = Operation.Update;
+    columnNames.forEach((columnName) => {
+      if (this.entityData.columns.includes(columnName)) {
+        this.analyzePropertyColumnsData(columnName);
+        this.handlePropertyValidations(columnName);
+      } else if (this.entityData.primaryColumns.includes(columnName)) {
+        this.validatePrimaryKeyProperty(columnName);
+      } else {
+        this.addPropertyErrors(columnName, [
+          `Entity does not contain column ${columnName}.`,
+        ]);
+      }
+    });
+
+    if (Object.keys(this.propertyValidationErrors).length > 0) {
+      throw new WrongPropertyError(
+        'Wrong entity-data properties',
+        this.propertyValidationErrors,
+      );
+    }
   }
 
   public validateTableAndColumnsData(): void {
@@ -69,7 +96,7 @@ class Validator {
   }
 
   private validateEntityValues(): void {
-    this.validatePrimaryKeyProperty();
+    this.validatePrimaryKeyProperties();
     this.validatePropertyValues();
     if (Object.keys(this.propertyValidationErrors).length > 0) {
       throw new WrongPropertyError(
@@ -236,17 +263,23 @@ class Validator {
     }
   }
 
-  private validatePrimaryKeyProperty(): void {
+  private validatePrimaryKeyProperties(): void {
     this.entityData.primaryColumns.forEach((primaryColumn: string) => {
-      if (
-        primaryColumn !== this.entityData.autoIncrementColumn &&
-        !ObjectHelper.propertyIsDefined(this.entity, primaryColumn)
-      ) {
-        this.addPropertyErrors(primaryColumn, [
-          `Not auto incremented primary keys should be defined`,
-        ]);
-      }
+      this.validatePrimaryKeyProperty(primaryColumn);
     });
+  }
+
+  private validatePrimaryKeyProperty(primaryColumn: string): void {
+    if (
+      (primaryColumn !== this.entityData.autoIncrementColumn ||
+        (primaryColumn === this.entityData.autoIncrementColumn &&
+          this.validateOperation === Operation.Update)) &&
+      !ObjectHelper.propertyIsDefined(this.entity, primaryColumn)
+    ) {
+      this.addPropertyErrors(primaryColumn, [
+        `Not auto incremented primary keys should be defined`,
+      ]);
+    }
   }
 
   private validatePropertyValues(): void {
