@@ -3,14 +3,19 @@ import {
   ColumnDataToHandel,
   EntityData,
   EntityRelation,
+  EntityTableAndColumns,
   PreparedEntityData,
 } from '../../types/entity-data/entity';
 import { EntityDataStore } from './index';
+import { ColumnData } from '../../types/entity-data/column';
 
 class Provider {
   private readonly entity: ObjectType;
   private readonly entityData: EntityData;
-  constructor(entity: ObjectType, entityClass: PropertyClassType<unknown>) {
+  constructor(
+    entityClass: PropertyClassType<unknown>,
+    entity: ObjectType = {},
+  ) {
     this.entityData = EntityDataStore.getEntityDataOrThrowError(
       entityClass,
       entity.constructor.name,
@@ -27,6 +32,15 @@ class Provider {
 
   getRelationsData(): Record<string, EntityRelation> {
     return this.entityData.relations;
+  }
+
+  getTableAndColumnsData(): EntityTableAndColumns {
+    return {
+      tableName: this.entityData.tableName,
+      columns: this.entityData.columns,
+      columnsData: this.entityData.columnsData,
+      primaryColumns: this.entityData.primaryColumns,
+    };
   }
 
   private getTableName(): string {
@@ -46,13 +60,24 @@ class Provider {
       const columnData = this.entityData.columnsData.get(column);
 
       return {
-        name: (columnData && columnData.customName?.columnName) || column,
+        name: Provider.getTableColumnKey(column, columnData),
         value:
           this.entity[column] !== undefined
             ? this.entity[column]
             : columnData && columnData.defaultValue,
       };
     });
+  }
+
+  public static getTableColumnKey(
+    entityColumn: string,
+    columnData: ColumnData | null,
+  ): string {
+    return (columnData && columnData.customName?.columnName) || entityColumn;
+  }
+
+  public static getEntityColumns(entityData: EntityData): string[] {
+    return [...entityData.columns, ...entityData.primaryColumns];
   }
 }
 

@@ -18,7 +18,10 @@ class Validator {
   private readonly entityClassName: string;
   private readonly propertyValidationErrors: ObjectWithPropertyTypesStringArray =
     {};
-  constructor(entity: ObjectType, entityClass: PropertyClassType<unknown>) {
+  constructor(
+    entityClass: PropertyClassType<unknown>,
+    entity: ObjectType = {},
+  ) {
     this.entityData = EntityDataStore.getEntityDataOrThrowError(
       entityClass,
       entity.constructor.name,
@@ -28,10 +31,27 @@ class Validator {
   }
 
   public validate(): void {
+    this.validateTableName();
     this.validateAutoIncrement();
     this.validatePrimaryColumn();
     this.validateColumns();
+    this.validaRelations();
     this.validateEntityValues();
+  }
+
+  public validateTableAndColumnsData(): void {
+    this.validateTableName();
+    this.validateAutoIncrement();
+    this.validatePrimaryColumn();
+    this.validateColumns();
+  }
+
+  private validateTableName(): void {
+    if (!this.entityData.tableName) {
+      throw new WrongEntityError(
+        'Wrong entity-data table name. Each entity should specify table name using Entity decorator',
+      );
+    }
   }
 
   public validaRelations(): void {
@@ -53,7 +73,7 @@ class Validator {
     this.validatePropertyValues();
     if (Object.keys(this.propertyValidationErrors).length > 0) {
       throw new WrongPropertyError(
-        'Wrong entity-data-data properties',
+        'Wrong entity-data properties',
         this.propertyValidationErrors,
       );
     }

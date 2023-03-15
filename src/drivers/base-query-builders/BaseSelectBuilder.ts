@@ -243,7 +243,7 @@ class BaseSelectBuilder implements SelectBuilder {
   }
 
   getColumnConditions(
-    columnConditions: ColumnCondition,
+    columnConditions: ColumnCondition<string>,
     logicalOperatorToConnect = LogicalOperator.And,
   ): string {
     const columnNames = Object.keys(columnConditions);
@@ -268,12 +268,12 @@ class BaseSelectBuilder implements SelectBuilder {
       : connectedColumnConditionsSql;
   }
 
-  getWhereConditions(condition: Where): string {
+  getWhereConditions(condition: Where<string>): string {
     return isLogicalWhere(condition)
       ? this.getLogicalWhere(condition)
       : this.getColumnConditions(condition);
   }
-  getLogicalWhere(logicalWhere: LogicalWhere): string {
+  getLogicalWhere(logicalWhere: LogicalWhere<string>): string {
     const logicalPartsOperatorConnector =
       logicalWhere.logicalOperator === LogicalOperator.Not
         ? LogicalOperator.And
@@ -296,19 +296,21 @@ class BaseSelectBuilder implements SelectBuilder {
       : wrappedConditionParts;
   }
 
-  getWhereSql(where?: Where): string {
+  getWhereSql(where?: Where<string>): string {
     return where
       ? `${this.whereStatement} ${this.getWhereConditions(where)}`
       : '';
   }
 
-  getHaving(where?: Where): string {
+  getHaving(where?: Where<string>): string {
     return where
       ? `${this.havingStatement} ${this.getWhereConditions(where)}`
       : '';
   }
 
   getGroupBy(columns?: string[]): string {
+    if (!columns || !columns.length) return '';
+
     columns.forEach((column) => {
       if (column) {
         throw new WrongSelectQuery(
@@ -317,9 +319,7 @@ class BaseSelectBuilder implements SelectBuilder {
       }
     });
 
-    return columns?.length
-      ? `${this.groupByStatement} ${columns.join(',')}`
-      : '';
+    return `${this.groupByStatement} ${columns.join(',')}`;
   }
 
   getLimit(limit?: number): string {
@@ -404,14 +404,14 @@ class BaseSelectBuilder implements SelectBuilder {
       .join(' ');
   }
 
-  validateSelectOptions(options: Select): void {
+  validateSelectOptions(options: Select<string>): void {
     if (options.having && !options.groupBy?.length) {
       throw new WrongSelectQuery(
         'Select Query: Having part of select request can not work without groupBy. Please specify both.',
       );
     }
   }
-  getSelectSql(options: Select): string {
+  getSelectSql(options: Select<string>): string {
     this.validateSelectOptions(options);
 
     const tableNameSql = this.getTableName(options.table);

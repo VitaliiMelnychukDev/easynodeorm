@@ -2,7 +2,7 @@ import { RequiredAlias } from './base';
 import { Select } from './select';
 
 export type SubQueryWithAlias = {
-  subQuery: Select;
+  subQuery: Select<string>;
   alias: string;
 };
 

@@ -4,7 +4,7 @@ import { returningAllAfterAction } from '../constants/sqlStatements';
 
 class PostgresUpdateBuilder extends BaseUpdateBuilder {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  afterUpdateSql(props: UpdateProps): string {
+  afterUpdateSql(props: UpdateProps<string>): string {
     return returningAllAfterAction;
   }
 }

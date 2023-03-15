@@ -13,18 +13,18 @@ class BaseDeleteBuilder implements DeleteBuilder {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  afterDeleteSql(props: DeleteProps): string {
+  afterDeleteSql(props: DeleteProps<string>): string {
     return '';
   }
 
-  validateProps(props: DeleteProps): void {
+  validateProps(props: DeleteProps<string>): void {
     if (!props.tableName) {
       throw new WrongDeleteQuery(
         'Table name can not be empty for delete statement',
       );
     }
   }
-  getDeleteSql(props: DeleteProps): string {
+  getDeleteSql(props: DeleteProps<string>): string {
     this.validateProps(props);
 
     return `${this.deleteStatement} ${this.fromStatement} ${

@@ -1,11 +1,18 @@
 import DataManipulationQueryManager from './DataManipulationQueryManager';
 import { ObjectType, PropertyClassType } from '../types/object';
-import { EntityDataManager, EntityDataTransformer } from '../utils/entity-data';
+import {
+  EntityDataManager,
+  EntityDataProvider,
+  EntityDataStore,
+  EntityDataTransformer,
+} from '../utils/entity-data';
 import { InsertBuilderRows } from './types/insert';
 import WrongQueryResult from '../error/WrongQueryResult';
 import { RelationType } from '../types/entity-data/relations';
 import WrongEntityToInsert from '../error/WrongEntityToInsert';
 import { EntityRelation } from '../types/entity-data/entity';
+import { Where } from './types/where';
+import { JoinVariant } from './types/join';
 
 class BaseRepository<Entity> {
   protected readonly queryManager: DataManipulationQueryManager;
@@ -25,8 +32,8 @@ class BaseRepository<Entity> {
   ): Promise<Entity> {
     let entityToReturn = entity;
     const relations = EntityDataManager.validateAndGetRelation(
-      entity,
       this.entityClass,
+      entity,
     );
 
     const oneToOneRelationInsertResults = {};
@@ -81,6 +88,126 @@ class BaseRepository<Entity> {
     }
 
     return entityToReturn;
+  }
+
+  async get(where: Where<keyof Entity>): Promise<Entity[]> {
+    return await this.selectByWhere(where, this.entityClass);
+  }
+
+  async populate(
+    entity: Entity,
+    withRelations: (keyof Entity | 'all')[] = [],
+  ): Promise<Entity> {
+    const relations = EntityDataManager.validateAndGetRelation(
+      this.entityClass,
+      entity,
+    );
+
+    const relationsToHandle = this.getRelationNamesToHandle(
+      relations,
+      withRelations,
+    );
+
+    for (const relationToHandle of relationsToHandle) {
+      const relation = relations[relationToHandle];
+
+      if (relation.relationType !== RelationType.ManyToMany) {
+        await this.populateOneToRelations(entity, relationToHandle, relation);
+      } else {
+        await this.populateManyToManyRelation(
+          entity,
+          relationToHandle,
+          relation,
+        );
+      }
+    }
+
+    return entity;
+  }
+
+  private async populateOneToRelations(
+    entity: Entity,
+    entityRelationFieldName: string,
+    relation: EntityRelation,
+  ): Promise<Entity> {
+    const rawEntities = await this.selectByWhere(
+      {
+        [relation.relatedEntityField]: entity[relation.field],
+      },
+      relation.getRelatedEntity(),
+    );
+
+    if (relation.relationType === RelationType.OneToMany) {
+      entity[entityRelationFieldName] = rawEntities;
+    } else if (rawEntities.length) {
+      entity[entityRelationFieldName] = rawEntities[0];
+    }
+
+    return entity;
+  }
+
+  private async populateManyToManyRelation(
+    entity: Entity,
+    entityRelationFieldName: string,
+    relation: EntityRelation,
+  ): Promise<Entity> {
+    const intermediateTableName = relation.intermediateTable.name;
+    const relatedTableEntityData = EntityDataStore.getEntityDataOrThrowError(
+      relation.getRelatedEntity(),
+    );
+    const relatedTableName = relatedTableEntityData.tableName;
+
+    const columnsToSelect = EntityDataProvider.getEntityColumns(
+      relatedTableEntityData,
+    ).map((columnToSelect) => `${relatedTableName}.${columnToSelect}`);
+
+    const rawEntities = await this.queryManager.select({
+      table: intermediateTableName,
+      columns: columnsToSelect,
+      joins: [
+        {
+          type: JoinVariant.Left,
+          table: relatedTableName,
+          on: {
+            column: `${intermediateTableName}.${relation.intermediateTable.fieldNames.relatedTableIntermediateField}`,
+            joinTableColumn: `${relatedTableName}.${relation.intermediateTable.fieldNames.relatedEntityField}`,
+          },
+        },
+      ],
+      where: {
+        [relation.intermediateTable.fieldNames.currentTableIntermediateField]:
+          entity[relation.intermediateTable.fieldNames.currentEntityField],
+      },
+    });
+
+    entity[entityRelationFieldName] =
+      EntityDataTransformer.transformArrayToEntities(
+        rawEntities,
+        relation.getRelatedEntity(),
+      );
+
+    return entity;
+  }
+
+  private async selectByWhere<T>(
+    where: Where<string>,
+    entityClass: PropertyClassType<T>,
+  ): Promise<T[]> {
+    const data =
+      EntityDataManager.validateAndGetTableAndColumnsData(entityClass);
+
+    const transformedWhereToSelect =
+      EntityDataTransformer.prepareWhereBeforeRequest(where, data);
+
+    const entities = await this.queryManager.select({
+      table: data.tableName,
+      where: transformedWhereToSelect,
+    });
+
+    return EntityDataTransformer.transformArrayToEntities(
+      entities,
+      entityClass,
+    );
   }
 
   private getRelationNamesToHandle(
@@ -219,8 +346,8 @@ class BaseRepository<Entity> {
     const properties: InsertBuilderRows = [];
     entity.forEach((entity: T) => {
       const insertData = EntityDataManager.validateAndGetEntityData(
-        entity,
         entityClass,
+        entity,
       );
       tableName = insertData.tableName;
       properties.push(insertData.columns);

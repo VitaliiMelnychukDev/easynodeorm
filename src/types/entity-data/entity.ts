@@ -7,7 +7,7 @@ import { getRelatedEntity, IntermediateTable, RelationType } from './relations';
 export class EntityData {
   validations: EntityValidations = new Map<string, PropertyValidations>();
 
-  tableName?: string;
+  tableName: string;
 
   columns: string[] = [];
 
@@ -42,3 +42,8 @@ export type PreparedEntityData = {
   tableName: string;
   columns: ColumnDataToHandel[];
 };
+
+export type EntityTableAndColumns = Pick<
+  EntityData,
+  'tableName' | 'columns' | 'columnsData' | 'primaryColumns'
+>;

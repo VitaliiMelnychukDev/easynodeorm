@@ -14,7 +14,7 @@ class BaseUpdateBuilder implements UpdateBuilder {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  afterUpdateSql(props: UpdateProps): string {
+  afterUpdateSql(props: UpdateProps<string>): string {
     return '';
   }
 
@@ -30,7 +30,7 @@ class BaseUpdateBuilder implements UpdateBuilder {
       .join(',');
   }
 
-  validateProps(props: UpdateProps): void {
+  validateProps(props: UpdateProps<string>): void {
     if (!props.tableName) {
       throw new WrongUpdateQuery(
         'Table name can not be empty for update query',
@@ -51,7 +51,7 @@ class BaseUpdateBuilder implements UpdateBuilder {
       }
     });
   }
-  getUpdateSql(props: UpdateProps): string {
+  getUpdateSql(props: UpdateProps<string>): string {
     this.validateProps(props);
 
     return `${this.updateStatement} ${props.tableName} ${

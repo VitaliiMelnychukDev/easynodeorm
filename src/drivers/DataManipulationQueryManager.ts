@@ -36,19 +36,19 @@ abstract class DataManipulationQueryManager {
     return await this.query<T>(insertQuery, Operation.Insert);
   }
 
-  async select<T>(select: Select): Promise<T[]> {
+  async select<T>(select: Select<string>): Promise<T[]> {
     const selectQuery = this.queryBuilders.selectBuilder.getSelectSql(select);
 
     return await this.query<T>(selectQuery, Operation.Select);
   }
 
-  async update<T>(props: UpdateProps): Promise<T[]> {
+  async update<T>(props: UpdateProps<string>): Promise<T[]> {
     const updateQuery = this.queryBuilders.updateBuilder.getUpdateSql(props);
 
     return await this.query<T>(updateQuery, Operation.Update);
   }
 
-  async delete<T>(props: DeleteProps): Promise<T[]> {
+  async delete<T>(props: DeleteProps<string>): Promise<T[]> {
     const deleteQuery = this.queryBuilders.deleteBuilder.getDeleteSql(props);
 
     return await this.query<T>(deleteQuery, Operation.Delete);

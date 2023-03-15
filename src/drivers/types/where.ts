@@ -1,17 +1,18 @@
 import { isSelect, Select } from './select';
+import { PropertyKeyTypes } from '../../types/global';
 
 export type DefaultTypes = string | boolean | number | null;
 
-export type DefaultTypeOrSubQuery = DefaultTypes | Select;
+export type DefaultTypeOrSubQuery = DefaultTypes | Select<string>;
 
-export type BetweenValue = number | Select;
+export type BetweenValue = number | Select<string>;
 
 export type Between = {
   lower: BetweenValue;
   upper: BetweenValue;
 };
 
-export type InConditionValue = string[] | number[] | Select;
+export type InConditionValue = string[] | number[] | Select<string>;
 
 export type ConditionValues = {
   equal: DefaultTypeOrSubQuery;
@@ -38,17 +39,19 @@ export type Condition = {
   [P in SupportedConditionOperators]?: ConditionValues[P];
 };
 
-export type ColumnCondition = {
-  [key in string]: Condition | DefaultTypes;
+export type ColumnCondition<ColumnNames extends PropertyKeyTypes> = {
+  [key in ColumnNames]?: Condition | DefaultTypes;
 };
 
-export type LogicalWhere = {
+export type LogicalWhere<ColumnNames extends PropertyKeyTypes> = {
   logicalOperator: LogicalOperator;
 
-  conditions: Where[];
+  conditions: Where<ColumnNames>[];
 };
 
-export type Where = ColumnCondition | LogicalWhere;
+export type Where<ColumnNames extends PropertyKeyTypes> =
+  | ColumnCondition<ColumnNames>
+  | LogicalWhere<ColumnNames>;
 
 export const isBetween = (
   conditionValues: ConditionValues[SupportedConditionOperators],
@@ -84,7 +87,7 @@ export const isDefaultTypeOrSubQuery = (
 };
 
 export const isLogicalWhere = (
-  whereCondition: Where,
-): whereCondition is LogicalWhere => {
-  return (<LogicalWhere>whereCondition).logicalOperator !== undefined;
+  whereCondition: Where<string>,
+): whereCondition is LogicalWhere<string> => {
+  return (<LogicalWhere<string>>whereCondition).logicalOperator !== undefined;
 };

@@ -1,6 +1,7 @@
 import { Where } from './where';
+import { PropertyKeyTypes } from '../../types/global';
 
-export type DeleteProps = {
+export type DeleteProps<ColumnNames extends PropertyKeyTypes> = {
   tableName: string;
-  where: Where;
+  where: Where<ColumnNames>;
 };
