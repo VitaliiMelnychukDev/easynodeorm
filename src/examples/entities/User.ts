@@ -24,7 +24,7 @@ class User {
   @PrimaryAutoIncrementColumn()
   id: number;
 
-  @Length(256)
+  @Length(2, 256)
   @Column()
   name: string;
 
@@ -33,7 +33,7 @@ class User {
   @Column()
   age: number;
 
-  @Length(50)
+  @Length(5, 50)
   @Column()
   email: string;
 
@@ -45,22 +45,23 @@ class User {
   @IsInteger()
   @IsUnsigned()
   @Column({
-    customName: 'address-id',
+    customName: 'address_id',
   })
   addressId: number;
 
-  @IsInteger()
   @Enum([Role.Admin, Role.Customer])
   @Column()
   role: Role;
 
   @OneToOne({
-    relatedField: 'addressId',
+    field: 'addressId',
+    relatedEntityField: 'id',
     getRelatedEntity: () => Address,
   })
   address: Address;
 
   @OneToMany({
+    field: 'id',
     relatedEntityField: 'userId',
     getRelatedEntity: () => Product,
   })
@@ -71,8 +72,10 @@ class User {
     intermediateTable: {
       name: 'user_tags',
       fieldNames: {
-        currentEntity: 'user_id',
-        relatedEntity: 'tag_id',
+        currentEntityField: 'id',
+        relatedEntityField: 'id',
+        currentTableIntermediateField: 'user_id',
+        relatedTableIntermediateField: 'tag_id',
       },
     },
   })

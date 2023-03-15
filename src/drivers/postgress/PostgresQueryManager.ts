@@ -22,6 +22,7 @@ class PostgresQueryManager extends DataManipulationQueryManager {
   }
 
   async query<T>(queryString: string): Promise<T[]> {
+    console.log('queryString: ', queryString);
     const result: QueryResult<T> = await this.dbConnection.query(queryString);
 
     return result.rows;

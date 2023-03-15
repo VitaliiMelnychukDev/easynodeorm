@@ -1,4 +1,4 @@
-import { EntityData } from '../../types/entity-data/entity';
+import { EntityData, EntityRelation } from '../../types/entity-data/entity';
 import WrongEntityError from '../../error/WrongEntityError';
 import WrongPropertyError from '../../error/WrongPropertyError';
 import ObjectHelper from '../../helpers/ObjectHelper';
@@ -10,6 +10,7 @@ import {
   PropertyClassType,
 } from '../../types/object';
 import { EntityDataStore } from './index';
+import { RelationType } from '../../types/entity-data/relations';
 
 class Validator {
   private readonly entity: ObjectType;
@@ -33,6 +34,20 @@ class Validator {
     this.validateEntityValues();
   }
 
+  public validaRelations(): void {
+    const relations = this.entityData.relations;
+    const relationKeys = Object.keys(relations);
+
+    relationKeys.forEach((relationKey) => {
+      const relation = relations[relationKey];
+      if (relation.relationType !== RelationType.ManyToMany) {
+        this.validateCommonRelationType(relation, relationKey);
+      } else {
+        this.validateManyToManyRelation(relation, relationKey);
+      }
+    });
+  }
+
   private validateEntityValues(): void {
     this.validatePrimaryKeyProperty();
     this.validatePropertyValues();
@@ -42,6 +57,131 @@ class Validator {
         this.propertyValidationErrors,
       );
     }
+  }
+
+  private validateCommonRelationType(
+    entityRelation: EntityRelation,
+    relationKey: string,
+  ): void {
+    if (!entityRelation.field || !entityRelation.relatedEntityField) {
+      throw new WrongEntityError(
+        `${this.getEntityDefaultError(
+          entityRelation.relationType,
+          relationKey,
+        )} field and relatedEntityField can not be empty.`,
+      );
+    }
+
+    if (
+      !this.entityData.primaryColumns.includes(entityRelation.field) &&
+      !this.entityData.columns.includes(entityRelation.field)
+    ) {
+      throw new WrongEntityError(
+        `${this.getEntityDefaultError(
+          entityRelation.relationType,
+          relationKey,
+        )} entity should contain ${entityRelation.field} field`,
+      );
+    }
+
+    const relationEntity = EntityDataStore.getEntityDataByFunction(
+      entityRelation.getRelatedEntity(),
+    );
+
+    if (!relationEntity) {
+      throw new WrongEntityError(
+        `${this.getEntityDefaultError(
+          entityRelation.relationType,
+          relationKey,
+        )} relation entity is not valid.`,
+      );
+    }
+
+    if (
+      !relationEntity.primaryColumns.includes(
+        entityRelation.relatedEntityField,
+      ) &&
+      !relationEntity.columns.includes(entityRelation.relatedEntityField)
+    ) {
+      throw new WrongEntityError(
+        `${this.getEntityDefaultError(
+          entityRelation.relationType,
+          relationKey,
+        )} related entity should contain ${
+          entityRelation.relatedEntityField
+        } field.`,
+      );
+    }
+  }
+
+  private validateManyToManyRelation(
+    entityRelation: EntityRelation,
+    relationKey: string,
+  ): void {
+    if (!entityRelation.intermediateTable) {
+      throw new WrongEntityError(
+        `${this.getEntityDefaultError(
+          entityRelation.relationType,
+          relationKey,
+        )} intermediateTable field can not be empty`,
+      );
+    }
+
+    if (
+      !this.entityData.primaryColumns.includes(
+        entityRelation.intermediateTable.fieldNames.currentEntityField,
+      ) &&
+      !this.entityData.columns.includes(
+        entityRelation.intermediateTable.fieldNames.currentEntityField,
+      )
+    ) {
+      throw new WrongEntityError(
+        `${this.getEntityDefaultError(
+          entityRelation.relationType,
+          relationKey,
+        )} entity should contain ${
+          entityRelation.intermediateTable.fieldNames.currentEntityField
+        } field`,
+      );
+    }
+
+    const relationEntity = EntityDataStore.getEntityDataByFunction(
+      entityRelation.getRelatedEntity(),
+    );
+
+    if (!relationEntity) {
+      throw new WrongEntityError(
+        `${this.getEntityDefaultError(
+          entityRelation.relationType,
+          relationKey,
+        )} relation entity is not valid.`,
+      );
+    }
+
+    if (
+      !relationEntity.primaryColumns.includes(
+        entityRelation.intermediateTable.fieldNames.relatedEntityField,
+      ) &&
+      !relationEntity.columns.includes(
+        entityRelation.intermediateTable.fieldNames.relatedEntityField,
+      )
+    ) {
+      throw new WrongEntityError(
+        `${this.getEntityDefaultError(
+          entityRelation.relationType,
+          relationKey,
+        )} related entity should contain ${
+          entityRelation.intermediateTable.fieldNames.relatedEntityField
+        } field.`,
+      );
+    }
+  }
+
+  private getEntityDefaultError(
+    relationType: RelationType,
+    relationKey: string,
+  ): string {
+    return `${this.entityClassName} ${relationType} relation from field ${relationKey} error: `;
   }
 
   private validateAutoIncrement(): void {
@@ -69,12 +209,7 @@ class Validator {
   }
 
   private validateColumns(): void {
-    if (
-      this.entityData.columns.length === 0 ||
-      (this.entityData.columns.length === 1 &&
-        this.entityData.autoIncrementColumn ===
-          this.entityData.primaryColumns[0])
-    ) {
+    if (this.entityData.columns.length === 0) {
       throw new WrongEntityError(
         `Entity ${this.entityClassName} should have at least one not primary auto incremented column`,
       );

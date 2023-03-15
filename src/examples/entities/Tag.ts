@@ -12,7 +12,7 @@ class Tag {
   @PrimaryAutoIncrementColumn()
   id: number;
 
-  @Length(50)
+  @Length(2, 50)
   @Column()
   name: string;
 
@@ -21,8 +21,10 @@ class Tag {
     intermediateTable: {
       name: 'user_tags',
       fieldNames: {
-        currentEntity: 'tag_id',
-        relatedEntity: 'user_id',
+        currentEntityField: 'id',
+        relatedEntityField: 'id',
+        currentTableIntermediateField: 'tag_id',
+        relatedTableIntermediateField: 'user_id',
       },
     },
   })

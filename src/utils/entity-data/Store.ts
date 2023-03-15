@@ -123,10 +123,10 @@ class Store {
     const entityData = Store.getExistedEntityDataOrCreate(target);
     if (
       relationsData.relationType !== RelationType.ManyToMany &&
-      !relationsData.relatedField
+      (!relationsData.field || !relationsData.relatedEntityField)
     ) {
       throw new WrongEntityError(
-        `Entity field ${propertyKeyName}: relation field can not be empty for oneToOne, oneToMany or ManyToOne relation`,
+        `Entity field ${propertyKeyName}: relation field and relatedEntityField can not be empty for oneToOne, oneToMany or ManyToOne relation`,
       );
     }
 

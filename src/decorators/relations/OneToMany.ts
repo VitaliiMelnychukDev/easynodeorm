@@ -1,6 +1,5 @@
 import { ObjectType } from '../../types/object';
 import {
-  EntityRelationFieldLocation,
   OneToManyProps,
   RelationType,
 } from '../../types/entity-data/relations';
@@ -11,10 +10,8 @@ const OneToMany =
   (target: ObjectType, propertyKey: string | symbol): void => {
     EntityDataStore.setRelation(target, propertyKey, {
       relationType: RelationType.OneToMany,
-      relatedField: {
-        fieldName: props.relatedEntityField,
-        location: EntityRelationFieldLocation.RelatedEntity,
-      },
+      field: props.field,
+      relatedEntityField: props.relatedEntityField,
       getRelatedEntity: props.getRelatedEntity,
     });
   };

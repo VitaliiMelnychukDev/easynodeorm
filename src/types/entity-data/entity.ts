@@ -2,12 +2,7 @@ import { ColumnData, ColumnsData } from './column';
 import { EntityValidations, PropertyValidations } from './validation';
 import { PropertyClassType } from '../object';
 import { AllowedTypes } from '../global';
-import {
-  EntityRelationFieldLocation,
-  getRelatedEntity,
-  IntermediateTable,
-  RelationType,
-} from './relations';
+import { getRelatedEntity, IntermediateTable, RelationType } from './relations';
 
 export class EntityData {
   validations: EntityValidations = new Map<string, PropertyValidations>();
@@ -28,13 +23,9 @@ export class EntityData {
 export type EntityRelation = {
   relationType: RelationType;
   getRelatedEntity: getRelatedEntity;
-  relatedField?: EntityRelationField;
+  field?: string;
+  relatedEntityField?: string;
   intermediateTable?: IntermediateTable;
-};
-
-type EntityRelationField = {
-  fieldName: string;
-  location: EntityRelationFieldLocation;
 };
 
 // eslint-disable-next-line @typescript-eslint/ban-types

@@ -2,6 +2,7 @@ import { ObjectType, PropertyClassType } from '../../types/object';
 import {
   ColumnDataToHandel,
   EntityData,
+  EntityRelation,
   PreparedEntityData,
 } from '../../types/entity-data/entity';
 import { EntityDataStore } from './index';
@@ -22,6 +23,10 @@ class Provider {
       tableName: this.getTableName(),
       columns: this.getColumns(),
     };
+  }
+
+  getRelationsData(): Record<string, EntityRelation> {
+    return this.entityData.relations;
   }
 
   private getTableName(): string {

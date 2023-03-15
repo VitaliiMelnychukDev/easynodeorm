@@ -1,4 +1,7 @@
-import { PreparedEntityData } from '../../types/entity-data/entity';
+import {
+  EntityRelation,
+  PreparedEntityData,
+} from '../../types/entity-data/entity';
 import { ObjectType, PropertyClassType } from '../../types/object';
 import Validator from './Validator';
 import Provider from './Provider';
@@ -11,6 +14,15 @@ class Manager {
     new Validator(entity, entityClass).validate();
 
     return new Provider(entity, entityClass).getEntityData();
+  }
+
+  public static validateAndGetRelation(
+    entity: ObjectType,
+    entityClass: PropertyClassType<unknown>,
+  ): Record<string, EntityRelation> {
+    new Validator(entity, entityClass).validaRelations();
+
+    return new Provider(entity, entityClass).getRelationsData();
   }
 }
 

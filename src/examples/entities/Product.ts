@@ -14,7 +14,7 @@ class Product {
   @PrimaryAutoIncrementColumn()
   id: number;
 
-  @Length(256)
+  @Length(3, 256)
   @Column()
   name: string;
 
@@ -25,12 +25,13 @@ class Product {
   @IsInteger()
   @IsUnsigned()
   @Column({
-    customName: 'user-id',
+    customName: 'user_id',
   })
   userId: number;
 
   @ManyToOne({
-    relatedField: 'userId',
+    field: 'userId',
+    relatedEntityField: 'id',
     getRelatedEntity: () => User,
   })
   user: User;

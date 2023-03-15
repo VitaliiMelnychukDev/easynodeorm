@@ -2,32 +2,29 @@ import { PropertyClassType } from '../object';
 
 export type getRelatedEntity = () => PropertyClassType<unknown>;
 
-export type OneToOneProps = {
-  relatedField: string;
-  getRelatedEntity: getRelatedEntity;
-  fieldLocation?: EntityRelationFieldLocation;
-};
-
-export type OneToManyProps = {
-  getRelatedEntity: getRelatedEntity;
+type CommonRelationFields = {
+  field: string;
   relatedEntityField: string;
-};
-
-export type ManyToOneProps = {
-  relatedField: string;
   getRelatedEntity: getRelatedEntity;
 };
 
-export type ManyToManyProps = {
-  getRelatedEntity: getRelatedEntity;
+export type OneToOneProps = CommonRelationFields;
+
+export type OneToManyProps = CommonRelationFields;
+
+export type ManyToOneProps = CommonRelationFields;
+
+export type ManyToManyProps = Pick<CommonRelationFields, 'getRelatedEntity'> & {
   intermediateTable: IntermediateTable;
 };
 
 export type IntermediateTable = {
   name: string;
   fieldNames: {
-    currentEntity: string;
-    relatedEntity: string;
+    currentEntityField: string;
+    currentTableIntermediateField: string;
+    relatedEntityField: string;
+    relatedTableIntermediateField: string;
   };
 };
 
@@ -36,9 +33,4 @@ export enum RelationType {
   OneToMany = 'OneToMany',
   ManyToOne = 'ManyToOne',
   ManyToMany = 'ManyToMany',
-}
-
-export const enum EntityRelationFieldLocation {
-  'CurrentEntity' = 'CurrentEntity',
-  'RelatedEntity' = 'RelatedEntity',
 }

@@ -1,2 +1,2 @@
 export const wrongQueryMessage =
-  'Only number, string, boolean nad null values available for query values.';
+  'Only number, string, boolean and null values available for query values.';

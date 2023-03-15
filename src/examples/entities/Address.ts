@@ -4,39 +4,38 @@ import {
   Length,
   PrimaryAutoIncrementColumn,
 } from '../../decorators';
-import OneToOne from '../../decorators/relations/OneToOne';
 import User from './User';
-import { EntityRelationFieldLocation } from '../../types/entity-data/relations';
+import OneToMany from '../../decorators/relations/OneToMany';
 
 @Entity('addresses')
 class Address {
   @PrimaryAutoIncrementColumn()
   id: number;
 
-  @Length(256)
+  @Length(3, 256)
   @Column()
   country: string;
 
-  @Length(256)
+  @Length(3, 256)
   @Column()
   city: string;
 
-  @Length(256)
+  @Length(3, 256)
   @Column({
-    customName: 'postal-code',
+    customName: 'postal_code',
   })
   postalCode: string;
 
-  @Length(1000)
+  @Length(3, 1000)
   @Column()
   address: string;
 
-  @OneToOne({
-    relatedField: 'addressId',
+  @OneToMany({
+    field: 'id',
+    relatedEntityField: 'addressId',
     getRelatedEntity: () => User,
-    fieldLocation: EntityRelationFieldLocation.RelatedEntity,
   })
-  user: User;
+  user: User[];
 }
 
 export default Address;
