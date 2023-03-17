@@ -5,8 +5,8 @@ import {
   IsUnsigned,
   Length,
   PrimaryAutoIncrementColumn,
+  ManyToOne,
 } from '../../decorators';
-import ManyToOne from '../../decorators/relations/ManyToOne';
 import User from './User';
 
 @Entity('products')

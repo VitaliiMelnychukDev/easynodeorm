@@ -1,13 +1,12 @@
-import BaseTableBuilder from '../../base-query-builders/BaseTableBuilder';
-import { AllowedTypes } from '../types/types';
+import BaseTableBuilder from '../../query-builders/BaseTableBuilder';
+import { AllowedPostgresTypes } from '../types/types';
 import { ColumnProps } from '../../types/createTable';
 import WrongTableQuery from '../../../error/WrongTableQuery';
 import TypeHelper from '../helpers/TypeHelper';
 
-class PostgresCreateTableBuilder extends BaseTableBuilder<AllowedTypes> {
+class PostgresCreateTableBuilder extends BaseTableBuilder<AllowedPostgresTypes> {
   public getUnsignedPart(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    isUnsigned?: ColumnProps<AllowedTypes>['isUnsigned'],
+    isUnsigned?: ColumnProps<AllowedPostgresTypes>['isUnsigned'],
   ): string {
     if (!isUnsigned) return '';
 
@@ -16,8 +15,10 @@ class PostgresCreateTableBuilder extends BaseTableBuilder<AllowedTypes> {
     );
   }
 
-  public getAutoIncrementedColumn(column: ColumnProps<AllowedTypes>): string {
-    const autoIncrementedColumn: ColumnProps<AllowedTypes> = {
+  public getAutoIncrementedColumn(
+    column: ColumnProps<AllowedPostgresTypes>,
+  ): string {
+    const autoIncrementedColumn: ColumnProps<AllowedPostgresTypes> = {
       ...column,
       type: 'serial',
     };
@@ -25,7 +26,7 @@ class PostgresCreateTableBuilder extends BaseTableBuilder<AllowedTypes> {
     return this.getSimpleColumn(autoIncrementedColumn);
   }
 
-  public getEnumColumn(column: ColumnProps<AllowedTypes>): string {
+  public getEnumColumn(column: ColumnProps<AllowedPostgresTypes>): string {
     if (column.type !== 'enum') {
       return '';
     }

@@ -1,15 +1,19 @@
 import { MessageCode } from '../../consts/message';
 import {
-  BaseDecoratorDataMethodParams,
+  BaseDecoratorMethodProps,
   ValidationDecoratorsMethodReturnType,
 } from '../../types/entity-data/validation';
 import { ObjectType } from '../../types/object';
 import { EntityDataStore } from '../../utils/entity-data';
+import {
+  DecoratorPropertyKey,
+  ValidationDecorator,
+} from '../../types/entity-data/decorator';
 
 const IsIntegerValidator = ({
   value,
   propertyKey,
-}: BaseDecoratorDataMethodParams): ValidationDecoratorsMethodReturnType => {
+}: BaseDecoratorMethodProps): ValidationDecoratorsMethodReturnType => {
   if (typeof value !== 'number') {
     return MessageCode.NotValidPropertyType;
   }
@@ -22,11 +26,11 @@ const IsIntegerValidator = ({
 };
 const IsInteger =
   (): PropertyDecorator =>
-  (target: ObjectType, propertyKey: string | symbol): void => {
+  (target: ObjectType, propertyKey: DecoratorPropertyKey): void => {
     EntityDataStore.setPropertyValidation({
       target,
       propertyKey,
-      decoratorKey: 'isInteger',
+      decoratorKey: ValidationDecorator.IsInteger,
       decoratorProps: {
         method: IsIntegerValidator,
       },

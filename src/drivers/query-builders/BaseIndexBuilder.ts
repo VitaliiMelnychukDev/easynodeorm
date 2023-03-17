@@ -3,8 +3,6 @@ import WrongIndexQuery from '../../error/WrongIndexQuery';
 import IndexBuilder from '../types/builders/IndexBuilder';
 
 class BaseIndexBuilder implements IndexBuilder {
-  public createIndexStatement = 'CREATE INDEX';
-  public dropIndexStatement = 'DROP INDEX';
   validateIndex(index: Index): void {
     if (!index.table || !index.indexName || !index.tableColumns.length) {
       throw new WrongIndexQuery(
@@ -19,7 +17,7 @@ class BaseIndexBuilder implements IndexBuilder {
     );
     this.validateIndex(index);
 
-    return `${this.createIndexStatement} ${index.indexName} ON ${
+    return `CREATE INDEX ${index.indexName} ON ${
       index.table
     }(${index.tableColumns.join(',')})`;
   }
@@ -31,7 +29,7 @@ class BaseIndexBuilder implements IndexBuilder {
       );
     }
 
-    return `${this.dropIndexStatement} ${indexName}`;
+    return `DROP INDEX ${indexName}`;
   }
 }
 

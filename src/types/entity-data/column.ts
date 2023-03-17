@@ -1,7 +1,7 @@
 import { ColumnDecoratorProps } from './decorators/column';
 
 type ColumnName = {
-  propertyName: string;
+  entityPropertyName: string;
   columnName: string;
 };
 

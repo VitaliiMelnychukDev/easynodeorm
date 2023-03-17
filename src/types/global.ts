@@ -1,7 +1,14 @@
-export type SupportedDatabases = 'postgres';
+export enum SupportedDatabaseNames {
+  Postgres = 'postgres',
+}
 
-export type AllowedTypes = string | boolean | number | null | undefined;
+export type SupportedDatabases = SupportedDatabaseNames.Postgres;
 
-export type AllowedTypesToMakeQueryWith = string | boolean | number;
+export type AllowedPropertiesTypes =
+  | string
+  | boolean
+  | number
+  | null
+  | undefined;
 
-export type PropertyKeyTypes = string | symbol | number;
+export type AllowedTypesToUseInSqlQuery = string | boolean | number;

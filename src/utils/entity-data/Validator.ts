@@ -2,7 +2,10 @@ import { EntityData, EntityRelation } from '../../types/entity-data/entity';
 import WrongEntityError from '../../error/WrongEntityError';
 import WrongPropertyError from '../../error/WrongPropertyError';
 import ObjectHelper from '../../helpers/ObjectHelper';
-import { isDecoratorData, Operation } from '../../types/entity-data/validation';
+import {
+  isDecoratorData,
+  QueryOperation,
+} from '../../types/entity-data/validation';
 import { MessageCode } from '../../consts/message';
 import {
   ObjectType,
@@ -16,10 +19,9 @@ class Validator {
   private readonly entity: ObjectType;
   private readonly entityData: EntityData;
   private readonly entityClassName: string;
+  private validateOperation: QueryOperation = QueryOperation.Insert;
+  private propertyValidationErrors: ObjectWithPropertyTypesStringArray = {};
 
-  private validateOperation: Operation = Operation.Insert;
-  private readonly propertyValidationErrors: ObjectWithPropertyTypesStringArray =
-    {};
   constructor(
     entityClass: PropertyClassType<unknown>,
     entity: ObjectType = {},
@@ -32,7 +34,7 @@ class Validator {
     this.entityClassName = entity.constructor.name;
   }
 
-  public validate(validateOperation = Operation.Insert): void {
+  public validate(validateOperation = QueryOperation.Insert): void {
     this.validateOperation = validateOperation;
     this.validateTableName();
     this.validateAutoIncrement();
@@ -43,8 +45,8 @@ class Validator {
   }
 
   public validateProperties(columnNames: string[]): void {
-    console.log('entityColumns: ', columnNames);
-    this.validateOperation = Operation.Update;
+    this.propertyValidationErrors = {};
+    this.validateOperation = QueryOperation.Update;
     columnNames.forEach((columnName) => {
       if (this.entityData.columns.includes(columnName)) {
         this.analyzePropertyColumnsData(columnName);
@@ -58,12 +60,7 @@ class Validator {
       }
     });
 
-    if (Object.keys(this.propertyValidationErrors).length > 0) {
-      throw new WrongPropertyError(
-        'Wrong entity-data properties',
-        this.propertyValidationErrors,
-      );
-    }
+    this.checkAndThrowWrongPropertyError();
   }
 
   public validateTableAndColumnsData(): void {
@@ -82,28 +79,17 @@ class Validator {
   }
 
   public validaRelations(): void {
-    const relations = this.entityData.relations;
-    const relationKeys = Object.keys(relations);
+    const relationKeys = Object.keys(this.entityData.relations);
 
     relationKeys.forEach((relationKey) => {
-      const relation = relations[relationKey];
+      const relation = this.entityData.relations[relationKey];
+
       if (relation.relationType !== RelationType.ManyToMany) {
         this.validateCommonRelationType(relation, relationKey);
       } else {
         this.validateManyToManyRelation(relation, relationKey);
       }
     });
-  }
-
-  private validateEntityValues(): void {
-    this.validatePrimaryKeyProperties();
-    this.validatePropertyValues();
-    if (Object.keys(this.propertyValidationErrors).length > 0) {
-      throw new WrongPropertyError(
-        'Wrong entity-data properties',
-        this.propertyValidationErrors,
-      );
-    }
   }
 
   private validateCommonRelationType(
@@ -119,17 +105,12 @@ class Validator {
       );
     }
 
-    if (
-      !this.entityData.primaryColumns.includes(entityRelation.field) &&
-      !this.entityData.columns.includes(entityRelation.field)
-    ) {
-      throw new WrongEntityError(
-        `${this.getEntityDefaultError(
-          entityRelation.relationType,
-          relationKey,
-        )} entity should contain ${entityRelation.field} field`,
-      );
-    }
+    this.validateRelationColumnExists(
+      this.entityData,
+      entityRelation.field,
+      entityRelation.relationType,
+      relationKey,
+    );
 
     const relationEntity = EntityDataStore.getEntityDataByFunction(
       entityRelation.getRelatedEntity(),
@@ -140,25 +121,16 @@ class Validator {
         `${this.getEntityDefaultError(
           entityRelation.relationType,
           relationKey,
-        )} relation entity is not valid.`,
+        )} relation entity is not valid entity.`,
       );
     }
 
-    if (
-      !relationEntity.primaryColumns.includes(
-        entityRelation.relatedEntityField,
-      ) &&
-      !relationEntity.columns.includes(entityRelation.relatedEntityField)
-    ) {
-      throw new WrongEntityError(
-        `${this.getEntityDefaultError(
-          entityRelation.relationType,
-          relationKey,
-        )} related entity should contain ${
-          entityRelation.relatedEntityField
-        } field.`,
-      );
-    }
+    this.validateRelationColumnExists(
+      relationEntity,
+      entityRelation.relatedEntityField,
+      entityRelation.relationType,
+      relationKey,
+    );
   }
 
   private validateManyToManyRelation(
@@ -174,23 +146,12 @@ class Validator {
       );
     }
 
-    if (
-      !this.entityData.primaryColumns.includes(
-        entityRelation.intermediateTable.fieldNames.currentEntityField,
-      ) &&
-      !this.entityData.columns.includes(
-        entityRelation.intermediateTable.fieldNames.currentEntityField,
-      )
-    ) {
-      throw new WrongEntityError(
-        `${this.getEntityDefaultError(
-          entityRelation.relationType,
-          relationKey,
-        )} entity should contain ${
-          entityRelation.intermediateTable.fieldNames.currentEntityField
-        } field`,
-      );
-    }
+    this.validateRelationColumnExists(
+      this.entityData,
+      entityRelation.intermediateTable.fieldNames.currentEntityField,
+      entityRelation.relationType,
+      relationKey,
+    );
 
     const relationEntity = EntityDataStore.getEntityDataByFunction(
       entityRelation.getRelatedEntity(),
@@ -205,21 +166,29 @@ class Validator {
       );
     }
 
+    this.validateRelationColumnExists(
+      relationEntity,
+      entityRelation.intermediateTable.fieldNames.relatedEntityField,
+      entityRelation.relationType,
+      relationKey,
+    );
+  }
+
+  private validateRelationColumnExists(
+    entity: EntityData,
+    columnToCheck: string,
+    relationType: RelationType,
+    relationKey: string,
+  ): void {
     if (
-      !relationEntity.primaryColumns.includes(
-        entityRelation.intermediateTable.fieldNames.relatedEntityField,
-      ) &&
-      !relationEntity.columns.includes(
-        entityRelation.intermediateTable.fieldNames.relatedEntityField,
-      )
+      !entity.primaryColumns.includes(columnToCheck) &&
+      !entity.columns.includes(columnToCheck)
     ) {
       throw new WrongEntityError(
         `${this.getEntityDefaultError(
-          entityRelation.relationType,
+          relationType,
           relationKey,
-        )} related entity should contain ${
-          entityRelation.intermediateTable.fieldNames.relatedEntityField
-        } field.`,
+        )} related entity should contain ${columnToCheck} field.`,
       );
     }
   }
@@ -231,12 +200,29 @@ class Validator {
     return `${this.entityClassName} ${relationType} relation from field ${relationKey} error: `;
   }
 
+  private validateEntityValues(): void {
+    this.propertyValidationErrors = {};
+    this.validatePrimaryKeyProperties();
+    this.validatePropertyValues();
+
+    this.checkAndThrowWrongPropertyError();
+  }
+
+  private checkAndThrowWrongPropertyError(): void {
+    if (Object.keys(this.propertyValidationErrors).length > 0) {
+      throw new WrongPropertyError(
+        'Wrong entity-data properties values',
+        this.propertyValidationErrors,
+      );
+    }
+  }
+
   private validateAutoIncrement(): void {
-    if (!this.entityData.autoIncrementColumn) return;
+    if (!this.entityData.autoIncrementedColumn) return;
 
     if (
       !this.entityData.primaryColumns.includes(
-        this.entityData.autoIncrementColumn,
+        this.entityData.autoIncrementedColumn,
       ) ||
       this.entityData.primaryColumns.length !== 1
     ) {
@@ -271,14 +257,12 @@ class Validator {
 
   private validatePrimaryKeyProperty(primaryColumn: string): void {
     if (
-      (primaryColumn !== this.entityData.autoIncrementColumn ||
-        (primaryColumn === this.entityData.autoIncrementColumn &&
-          this.validateOperation === Operation.Update)) &&
+      (primaryColumn !== this.entityData.autoIncrementedColumn ||
+        (primaryColumn === this.entityData.autoIncrementedColumn &&
+          this.validateOperation === QueryOperation.Update)) &&
       !ObjectHelper.propertyIsDefined(this.entity, primaryColumn)
     ) {
-      this.addPropertyErrors(primaryColumn, [
-        `Not auto incremented primary keys should be defined`,
-      ]);
+      this.addPropertyErrors(primaryColumn, [`Primary key should be defined`]);
     }
   }
 
@@ -297,6 +281,7 @@ class Validator {
       this.addPropertyErrors(columnName, [`Column ${columnName} is required`]);
     }
   }
+
   private handlePropertyValidations(columnName: string): void {
     const propertyValidations = this.entityData.validations.get(columnName);
     const defaultColumnValueExists = this.defaultValueExists(columnName);

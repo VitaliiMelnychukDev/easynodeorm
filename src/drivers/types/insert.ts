@@ -1,3 +1,3 @@
-import { ColumnDataToHandel } from '../../types/entity-data/entity';
+import { PreparedColumnsData } from '../../types/entity-data/entity';
 
-export type InsertBuilderRows = ColumnDataToHandel[][];
+export type RowsToInsert = PreparedColumnsData[][];

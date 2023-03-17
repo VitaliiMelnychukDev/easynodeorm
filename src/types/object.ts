@@ -3,8 +3,8 @@ export type ObjectType = {
   constructor: Function;
 };
 
-export type ObjectWithTheSamePropertyTypes<T> = {
-  [key in string]?: T;
+export type ObjectWithTheSamePropertyTypes<PropertyType> = {
+  [key in string]?: PropertyType;
 };
 
 export type ObjectWithPropertyTypesStringArray = ObjectWithTheSamePropertyTypes<
@@ -12,3 +12,5 @@ export type ObjectWithPropertyTypesStringArray = ObjectWithTheSamePropertyTypes<
 >;
 
 export type PropertyClassType<TClass> = { new (): TClass };
+
+export type PropertyKeyTypes = string | symbol | number;

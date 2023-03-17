@@ -2,13 +2,12 @@ import SelectBuilder from '../types/builders/SelectBuilder';
 import { UpdateProps } from '../types/update';
 import WrongUpdateQuery from '../../error/WrongUpdateQuery';
 import QueryBuilderHelper from '../helpers/QueryBuilderHelper';
-import { ColumnDataToHandel } from '../../types/entity-data/entity';
+import { PreparedColumnsData } from '../../types/entity-data/entity';
 import UpdateBuilder from '../types/builders/UpdateBuilder';
 
 class BaseUpdateBuilder implements UpdateBuilder {
   readonly selectBuilder: SelectBuilder;
-  public updateStatement = 'UPDATE';
-  public setStatement = 'SET';
+
   constructor(selectBuilder: SelectBuilder) {
     this.selectBuilder = selectBuilder;
   }
@@ -18,13 +17,13 @@ class BaseUpdateBuilder implements UpdateBuilder {
     return '';
   }
 
-  getUpdatedColumnSql(columnData: ColumnDataToHandel): string {
+  getUpdatedColumnSql(columnData: PreparedColumnsData): string {
     return `${columnData.name} = ${QueryBuilderHelper.prepareValue(
       columnData.value,
     )}`;
   }
 
-  getUpdatedColumnsSql(columnsData: ColumnDataToHandel[]): string {
+  getUpdatedColumnsSql(columnsData: PreparedColumnsData[]): string {
     return columnsData
       .map((columnData) => this.getUpdatedColumnSql(columnData))
       .join(',');
@@ -54,9 +53,7 @@ class BaseUpdateBuilder implements UpdateBuilder {
   getUpdateSql(props: UpdateProps<string>): string {
     this.validateProps(props);
 
-    return `${this.updateStatement} ${props.tableName} ${
-      this.setStatement
-    } ${this.getUpdatedColumnsSql(
+    return `UPDATE ${props.tableName} SET ${this.getUpdatedColumnsSql(
       props.columns,
     )} ${this.selectBuilder.getWhereSql(props.where)} ${this.afterUpdateSql(
       props,

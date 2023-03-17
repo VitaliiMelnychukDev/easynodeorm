@@ -8,10 +8,8 @@ import {
   PrimaryAutoIncrementColumn,
 } from '../../decorators';
 import Address from './Address';
-import OneToOne from '../../decorators/relations/OneToOne';
-import OneToMany from '../../decorators/relations/OneToMany';
+import { OneToOne, OneToMany, ManyToMany } from '../../decorators';
 import Product from './Product';
-import ManyToMany from '../../decorators/relations/ManyToMany';
 import Tag from './Tag';
 
 export enum Role {

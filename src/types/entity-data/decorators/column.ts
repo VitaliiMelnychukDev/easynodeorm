@@ -1,6 +1,6 @@
-import { AllowedTypes } from '../../global';
+import { AllowedPropertiesTypes } from '../../global';
 
 export type ColumnDecoratorProps = {
   customName?: string;
-  defaultValue?: AllowedTypes;
+  defaultValue?: AllowedPropertiesTypes;
 };

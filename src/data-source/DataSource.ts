@@ -1,6 +1,6 @@
 import { ConnectionOptions } from '../types/connection';
 import PostgresDriver from '../drivers/postgress/PostgresDriver';
-import { SupportedDatabases } from '../types/global';
+import { SupportedDatabaseNames, SupportedDatabases } from '../types/global';
 import { Driver } from '../types/driver';
 
 class DataSource {
@@ -8,7 +8,7 @@ class DataSource {
     options: ConnectionOptions,
   ): Driver[T] {
     switch (options.name) {
-      case 'postgres':
+      case SupportedDatabaseNames.Postgres:
         return new PostgresDriver(options) as Driver[T];
       default:
         throw new Error("Only Postgres db's are supported");

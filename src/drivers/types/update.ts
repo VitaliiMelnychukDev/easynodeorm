@@ -1,10 +1,10 @@
 import { Where } from './where';
-import { ColumnDataToHandel } from '../../types/entity-data/entity';
-import { PropertyKeyTypes } from '../../types/global';
+import { PreparedColumnsData } from '../../types/entity-data/entity';
+import { PropertyKeyTypes } from '../../types/object';
 
 export type UpdateProps<ColumnNames extends PropertyKeyTypes> = {
   tableName: string;
   where: Where<ColumnNames>;
-  columns: ColumnDataToHandel[];
+  columns: PreparedColumnsData[];
   returnUpdatedRows?: boolean;
 };

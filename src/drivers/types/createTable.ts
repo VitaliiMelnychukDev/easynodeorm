@@ -1,6 +1,10 @@
 export type DefaultValueTypes = string | boolean | number | null;
 
-export type AllowedAutoGenerationStrategy = 'increment';
+export enum AutoGenerationStrategy {
+  Increment = 'increment',
+}
+
+export type AllowedAutoGenerationStrategy = AutoGenerationStrategy.Increment;
 
 export type ColumnProps<AllowedTypes> = {
   name: string;

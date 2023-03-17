@@ -37,7 +37,7 @@ const testSelect = async (): Promise<void> => {
         table: 'user_tags',
         on: {
           column: 'u.id',
-          joinTableColumn: 'user_tags.user_id',
+          joinedTableColumn: 'user_tags.user_id',
         },
       },
       {
@@ -48,7 +48,7 @@ const testSelect = async (): Promise<void> => {
         },
         on: {
           column: 'user_tags.tag_id',
-          joinTableColumn: 't.id',
+          joinedTableColumn: 't.id',
         },
       },
     ],

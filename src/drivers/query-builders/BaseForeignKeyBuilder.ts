@@ -1,21 +1,8 @@
 import { ForeignKey, ForeignKeyAction } from '../types/foreignKey';
-import {
-  addConstraintStatement,
-  alterTableStatement,
-  dropConstrainStatement,
-} from '../consts/sqlStatements';
 import WrongForeignKeyQuery from '../../error/WrongForeignKeyQuery';
 import ForeignKeyBuilder from '../types/builders/ForeignKeyBuilder';
 
 class BaseForeignKeyBuilder implements ForeignKeyBuilder {
-  public alterTableStatement = alterTableStatement;
-  public foreignKeyStatement = 'FOREIGN KEY';
-  public referencesStatement = 'REFERENCES';
-  public onDeleteStatement = 'ON DELETE';
-  public onUpdateStatement = 'ON UPDATE';
-  public dropConstrainStatement = dropConstrainStatement;
-  public addConstraintStatement = addConstraintStatement;
-
   getForeignKeyActionSql(foreignKeyAction: ForeignKeyAction): string {
     switch (foreignKeyAction) {
       case ForeignKeyAction.Cascade:
@@ -51,17 +38,17 @@ class BaseForeignKeyBuilder implements ForeignKeyBuilder {
   getCreateForeignKeySql(foreignKey: ForeignKey): string {
     this.validateForeignKey(foreignKey);
 
-    const referenceSql = `${this.referencesStatement} ${foreignKey.referenceTable}(${foreignKey.referenceTableColumn})`;
+    const referenceSql = `REFERENCES ${foreignKey.referenceTable}(${foreignKey.referenceTableColumn})`;
     const onUpdateConstraint = this.getConstraint(
-      this.onUpdateStatement,
+      'ON UPDATE',
       foreignKey.onUpdate,
     );
     const onDeleteConstraint = this.getConstraint(
-      this.onDeleteStatement,
+      'ON DELETE',
       foreignKey.onUpdate,
     );
 
-    return `${this.alterTableStatement} ${foreignKey.table} ${this.addConstraintStatement} ${foreignKey.foreignKeyName} ${this.foreignKeyStatement} (${foreignKey.tableColumn}) ${referenceSql} ${onUpdateConstraint} ${onDeleteConstraint}`;
+    return `ALTER TABLE ${foreignKey.table} ADD CONSTRAINT ${foreignKey.foreignKeyName} FOREIGN KEY (${foreignKey.tableColumn}) ${referenceSql} ${onUpdateConstraint} ${onDeleteConstraint}`;
   }
 
   getDropForeignKeySql(tableName: string, foreignKeyName: string): string {
@@ -71,7 +58,7 @@ class BaseForeignKeyBuilder implements ForeignKeyBuilder {
       );
     }
 
-    return `${this.alterTableStatement} ${tableName} ${this.dropConstrainStatement} ${foreignKeyName}`;
+    return `ALTER TABLE ${tableName} DROP CONSTRAINT ${foreignKeyName}`;
   }
 }
 

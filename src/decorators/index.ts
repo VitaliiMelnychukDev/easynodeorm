@@ -6,3 +6,7 @@ export { default as Length } from './validations/Length';
 export { default as IsInteger } from './validations/IsInteger';
 export { default as IsUnsigned } from './validations/IsUnsigned';
 export { default as Enum } from './validations/Enum';
+export { default as OneToOne } from './relations/OneToOne';
+export { default as OneToMany } from './relations/OneToMany';
+export { default as ManyToOne } from './relations/ManyToOne';
+export { default as ManyToMany } from './relations/ManyToMany';

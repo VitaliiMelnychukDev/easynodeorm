@@ -1,12 +1,12 @@
 import { DataManipulationQueryManagerProps } from './types/queryManager';
-import BaseInsertBuilder from './base-query-builders/BaseInsertBuilder';
-import { InsertBuilderRows } from './types/insert';
+import BaseInsertBuilder from './query-builders/BaseInsertBuilder';
+import { RowsToInsert } from './types/insert';
 import { Operation } from './consts/operation';
-import SelectBuilder from './base-query-builders/BaseSelectBuilder';
+import SelectBuilder from './query-builders/BaseSelectBuilder';
 import { Select } from './types/select';
-import BaseDeleteBuilder from './base-query-builders/BaseDeleteBuilder';
+import BaseDeleteBuilder from './query-builders/BaseDeleteBuilder';
 import { DeleteProps } from './types/delete';
-import BaseUpdateBuilder from './base-query-builders/BaseUpdateBuilder';
+import BaseUpdateBuilder from './query-builders/BaseUpdateBuilder';
 import { UpdateProps } from './types/update';
 
 abstract class DataManipulationQueryManager {
@@ -27,7 +27,7 @@ abstract class DataManipulationQueryManager {
     };
   }
 
-  async insert<T>(tableName: string, rows: InsertBuilderRows): Promise<T[]> {
+  async insert<T>(tableName: string, rows: RowsToInsert): Promise<T[]> {
     const insertQuery = this.queryBuilders.insertBuilder.getInsertSql(
       tableName,
       rows,

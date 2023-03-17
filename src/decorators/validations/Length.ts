@@ -1,17 +1,21 @@
-import LengthProps from '../../types/entity-data/decorators/length';
+import { LengthProps } from '../../types/entity-data/decorators/length';
 import { MessageCode } from '../../consts/message';
 import {
-  DecoratorDataMethodParams,
+  DecoratorDataMethodProps,
   ValidationDecoratorsMethodReturnType,
 } from '../../types/entity-data/validation';
 import { ObjectType } from '../../types/object';
 import { EntityDataStore } from '../../utils/entity-data';
+import {
+  DecoratorPropertyKey,
+  ValidationDecorator,
+} from '../../types/entity-data/decorator';
 
 const LengthValidator = ({
   value,
   propertyKey,
   props,
-}: DecoratorDataMethodParams<LengthProps>): ValidationDecoratorsMethodReturnType => {
+}: DecoratorDataMethodProps<LengthProps>): ValidationDecoratorsMethodReturnType => {
   if (typeof value !== 'string') {
     return MessageCode.NotValidPropertyType;
   }
@@ -29,11 +33,11 @@ const LengthValidator = ({
 
 const Length =
   (min: number, max?: number): PropertyDecorator =>
-  (target: ObjectType, propertyKey: string | symbol): void => {
+  (target: ObjectType, propertyKey: DecoratorPropertyKey): void => {
     EntityDataStore.setPropertyValidation({
       target,
       propertyKey,
-      decoratorKey: 'lengthDecorator',
+      decoratorKey: ValidationDecorator.Length,
       decoratorProps: {
         props: { min, ...(max && { max }) },
         method: LengthValidator,

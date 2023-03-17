@@ -1,10 +1,15 @@
 import WrongQuery from '../../error/WrongQuery';
-import { AllowedTypes, AllowedTypesToMakeQueryWith } from '../../types/global';
+import {
+  AllowedPropertiesTypes,
+  AllowedTypesToUseInSqlQuery,
+} from '../../types/global';
 import { wrongQueryMessage } from '../consts/messages';
 import { escape } from 'sqlstring';
 
 class QueryBuilderHelper {
-  public static prepareValue(value: AllowedTypes): AllowedTypesToMakeQueryWith {
+  public static prepareValue(
+    value: AllowedPropertiesTypes,
+  ): AllowedTypesToUseInSqlQuery {
     switch (typeof value) {
       case 'number':
         return Number(value);

@@ -1,25 +1,17 @@
-import { InsertBuilderRows } from '../types/insert';
+import { RowsToInsert } from '../types/insert';
 import WrongInsertQuery from '../../error/WrongInsertQuery';
 import QueryBuilderHelper from '../helpers/QueryBuilderHelper';
-import { AllowedTypes } from '../../types/global';
+import { AllowedPropertiesTypes } from '../../types/global';
 import InsertBuilder from '../types/builders/InsertBuilder';
 
 class BaseInsertBuilder implements InsertBuilder {
-  public queryStatement = 'INSERT INTO';
-
-  public valueStatement = 'VALUES';
-
-  getTableName(tableName: string): string {
-    return tableName;
-  }
-
-  getColumns(rows: InsertBuilderRows): string {
+  getColumns(rows: RowsToInsert): string {
     const columns: string[] = rows[0].map((property) => property.name);
 
     return `(${columns.join(',')})`;
   }
 
-  getRowValues(values: AllowedTypes[]): string {
+  getRowValues(values: AllowedPropertiesTypes[]): string {
     return values
       .map((value) => QueryBuilderHelper.prepareValue(value))
       .join(',');
@@ -29,16 +21,16 @@ class BaseInsertBuilder implements InsertBuilder {
     return rowValues.map((rowValue) => `(${rowValue})`).join(',');
   }
 
-  getRowsSqlWithValues(rows: InsertBuilderRows): string {
+  getRowsSqlWithValues(rows: RowsToInsert): string {
     const rowQueries = rows.map((row) => {
       const rowValues = row.map((rowValue) => rowValue.value);
 
       return this.getRowValues(rowValues);
     });
-    return `${this.valueStatement} ${this.getRows(rowQueries)}`;
+    return `VALUES ${this.getRows(rowQueries)}`;
   }
 
-  checkProperties(tableName: string, rows: InsertBuilderRows): void {
+  checkProperties(tableName: string, rows: RowsToInsert): void {
     if (!tableName) {
       throw new WrongInsertQuery(
         'Table name can not be empty for insert query',
@@ -63,18 +55,16 @@ class BaseInsertBuilder implements InsertBuilder {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  afterInsertSql(rows: InsertBuilderRows): string {
+  afterInsertSql(rows: RowsToInsert): string {
     return '';
   }
 
-  getInsertSql(tableName: string, rows: InsertBuilderRows): string {
+  getInsertSql(tableName: string, rows: RowsToInsert): string {
     this.checkProperties(tableName, rows);
 
-    return `${this.queryStatement} ${this.getTableName(
-      tableName,
-    )} ${this.getColumns(rows)} ${this.getRowsSqlWithValues(
+    return `INSERT INTO ${tableName} ${this.getColumns(
       rows,
-    )} ${this.afterInsertSql(rows)}`;
+    )} ${this.getRowsSqlWithValues(rows)} ${this.afterInsertSql(rows)}`;
   }
 }
 

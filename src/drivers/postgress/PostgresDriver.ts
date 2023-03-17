@@ -4,12 +4,12 @@ import PostgresQueryManager from './PostgresQueryManager';
 import { PostgresPoolConnection } from './types/connection';
 import BaseRepository from '../BaseRepository';
 import { PropertyClassType } from '../../types/object';
-import { AllowedTypes } from './types/types';
+import { AllowedPostgresTypes } from './types/types';
 import DataDefinitionPostgresQueryManager from './DataDefinitionPostgresQueryManager';
 import SqlBaseDriver from '../SqlBaseDriver';
 import PostgresSeparateConnectionManager from './PostgresSeparateConnectionManager';
 
-class PostgresDriver extends SqlBaseDriver<AllowedTypes> {
+class PostgresDriver extends SqlBaseDriver<AllowedPostgresTypes> {
   private readonly dbConnection: PostgresPoolConnection;
 
   public readonly queryManager: PostgresQueryManager;

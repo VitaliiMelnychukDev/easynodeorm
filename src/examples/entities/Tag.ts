@@ -3,8 +3,8 @@ import {
   Entity,
   Length,
   PrimaryAutoIncrementColumn,
+  ManyToMany,
 } from '../../decorators';
-import ManyToMany from '../../decorators/relations/ManyToMany';
 import User from './User';
 
 @Entity('tags')

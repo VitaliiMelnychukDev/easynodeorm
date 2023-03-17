@@ -2,20 +2,22 @@ import { SetPropertyValidationProps } from '../../types/entity-data/store';
 import { ColumnData } from '../../types/entity-data/column';
 import {
   EntityData,
-  EntityDataStoreKeyType,
-  EntityDataStoreType,
+  EntityDataStoreKey,
+  EntityDataStore,
   EntityRelation,
 } from '../../types/entity-data/entity';
 import { ObjectType, PropertyClassType } from '../../types/object';
 import WrongEntityError from '../../error/WrongEntityError';
 import { ColumnDecoratorProps } from '../../types/entity-data/decorators/column';
 import { RelationType } from '../../types/entity-data/relations';
+import { DecoratorPropertyKey } from '../../types/entity-data/decorator';
 
 class Store {
-  private static readonly entityDataStore: EntityDataStoreType = new Map<
-    EntityDataStoreKeyType,
+  private static readonly entityDataStore: EntityDataStore = new Map<
+    EntityDataStoreKey,
     EntityData
   >();
+
   public static setPropertyValidation({
     target,
     propertyKey,
@@ -39,7 +41,11 @@ class Store {
     target: ObjectType,
     tableName: string,
   ): void {
-    if (!tableName) return;
+    if (!tableName) {
+      throw new WrongEntityError(
+        `Entity tableName should be string and not can not empty`,
+      );
+    }
     const entityData = Store.getExistedEntityDataOrCreate(target);
 
     entityData.tableName = tableName;
@@ -47,14 +53,16 @@ class Store {
 
   public static setColumnProperties(
     target: ObjectType,
-    propertyKey: string | symbol,
+    propertyKey: DecoratorPropertyKey,
     columnProperties: ColumnDecoratorProps,
   ): void {
     const propertyKeyName =
       Store.validateAndReturnStringPropertyKey(propertyKey);
     const entityData = Store.getExistedEntityDataOrCreate(target);
 
-    entityData.columns.push(propertyKeyName);
+    if (!entityData.columns.includes(propertyKeyName)) {
+      entityData.columns.push(propertyKeyName);
+    }
 
     if (
       !columnProperties.customName &&
@@ -65,7 +73,7 @@ class Store {
     const columnsData: ColumnData = {
       ...(columnProperties.customName && {
         customName: {
-          propertyName: propertyKeyName,
+          entityPropertyName: propertyKeyName,
           columnName: columnProperties.customName,
         },
       }),
@@ -79,7 +87,7 @@ class Store {
 
   public static setPrimaryColumn(
     target: ObjectType,
-    propertyKey: string | symbol,
+    propertyKey: DecoratorPropertyKey,
     customName?: ColumnDecoratorProps['customName'],
   ): void {
     const propertyKeyName =
@@ -93,7 +101,7 @@ class Store {
     if (customName) {
       entityData.columnsData.set(propertyKeyName, {
         customName: {
-          propertyName: propertyKeyName,
+          entityPropertyName: propertyKeyName,
           columnName: customName,
         },
       });
@@ -102,20 +110,20 @@ class Store {
 
   public static setPrimaryAutoIncrementColumn(
     target: ObjectType,
-    propertyKey: string | symbol,
+    propertyKey: DecoratorPropertyKey,
     customName?: ColumnDecoratorProps['customName'],
   ): void {
     const propertyKeyName =
       Store.validateAndReturnStringPropertyKey(propertyKey);
     const entityData = Store.getExistedEntityDataOrCreate(target);
 
-    entityData.autoIncrementColumn = propertyKeyName;
+    entityData.autoIncrementedColumn = propertyKeyName;
     Store.setPrimaryColumn(target, propertyKeyName, customName);
   }
 
   public static setRelation(
     target: ObjectType,
-    propertyKey: string | symbol,
+    propertyKey: DecoratorPropertyKey,
     relationsData: EntityRelation,
   ): void {
     const propertyKeyName =
@@ -143,7 +151,7 @@ class Store {
   }
 
   public static getEntityDataByFunction(
-    fC: EntityDataStoreKeyType,
+    fC: EntityDataStoreKey,
   ): EntityData | undefined {
     return this.entityDataStore.get(fC);
   }
@@ -164,7 +172,7 @@ class Store {
   }
 
   private static validateAndReturnStringPropertyKey(
-    propertyKey: string | symbol,
+    propertyKey: DecoratorPropertyKey,
   ): string {
     if (typeof propertyKey !== 'string' || !propertyKey) {
       throw new WrongEntityError(

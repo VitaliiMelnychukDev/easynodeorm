@@ -1,12 +1,12 @@
-import { PostgresPoolConnection } from './types/connection';
+import { BaseConnectionMethods } from './types/connection';
 import DataDefinitionQueryManager from '../DataDefinitionQueryManager';
-import { AllowedTypes } from './types/types';
+import { AllowedPostgresTypes } from './types/types';
 import PostgresCreateTableBuilder from './query-builders/PostgresTableBuilder';
 
-class DataDefinitionPostgresQueryManager extends DataDefinitionQueryManager<AllowedTypes> {
-  protected readonly dbConnection: PostgresPoolConnection;
+class DataDefinitionPostgresQueryManager extends DataDefinitionQueryManager<AllowedPostgresTypes> {
+  protected readonly dbConnection: BaseConnectionMethods;
 
-  public constructor(dbConnection: any) {
+  public constructor(dbConnection: BaseConnectionMethods) {
     super({
       tableBuilder: new PostgresCreateTableBuilder(),
     });

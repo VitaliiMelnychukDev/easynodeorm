@@ -1,5 +1,5 @@
 import {
-  ColumnDataToHandel,
+  PreparedColumnsData,
   EntityRelation,
   EntityTableAndColumns,
   PreparedEntityData,
@@ -7,13 +7,13 @@ import {
 import { ObjectType, PropertyClassType } from '../../types/object';
 import Validator from './Validator';
 import Provider from './Provider';
-import { Operation } from '../../types/entity-data/validation';
+import { QueryOperation } from '../../types/entity-data/validation';
 
 class Manager {
   public static validateAndGetDataForOperation(
     entityClass: PropertyClassType<unknown>,
     entity: ObjectType = {},
-    operation = Operation.Insert,
+    operation = QueryOperation.Insert,
   ): PreparedEntityData {
     new Validator(entityClass, entity).validate(operation);
 
@@ -23,15 +23,14 @@ class Manager {
   public static validateAndGetColumnsPreparedData(
     entityClass: PropertyClassType<unknown>,
     entity: ObjectType = {},
-  ): ColumnDataToHandel[] {
+  ): PreparedColumnsData[] {
     const entityColumns = Object.keys(entity);
-
     new Validator(entityClass, entity).validateProperties(entityColumns);
 
     return new Provider(entityClass, entity).getPreparedColumns(entityColumns);
   }
 
-  public static validateAndGetRelation(
+  public static validateAndGetRelations(
     entityClass: PropertyClassType<unknown>,
     entity: ObjectType = {},
   ): Record<string, EntityRelation> {

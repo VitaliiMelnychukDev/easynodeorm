@@ -5,11 +5,11 @@ export type BaseNameObject = {
 
 export type RequiredAlias = Required<BaseNameObject>;
 
-export const isRequiredAlias = (table: any): table is RequiredAlias => {
+export const isRequiredAlias = (obj: any): obj is RequiredAlias => {
   return (
-    typeof table === 'object' &&
-    table &&
-    table.alias !== undefined &&
-    table.name !== undefined
+    typeof obj === 'object' &&
+    obj &&
+    obj.alias !== undefined &&
+    obj.name !== undefined
   );
 };

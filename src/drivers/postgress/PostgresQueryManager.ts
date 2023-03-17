@@ -3,7 +3,7 @@ import DataManipulationQueryManager from '../DataManipulationQueryManager';
 import PostgresInsertBuilder from './query-builders/PostgresInsertBuilder';
 import { QueryResult } from './types/query';
 import PostgresDeleteBuilder from './query-builders/PostgresDeleteBuilder';
-import BaseSelectBuilder from '../base-query-builders/BaseSelectBuilder';
+import BaseSelectBuilder from '../query-builders/BaseSelectBuilder';
 import PostgresUpdateBuilder from './query-builders/PostgresUpdateBuilder';
 
 class PostgresQueryManager extends DataManipulationQueryManager {
@@ -22,7 +22,6 @@ class PostgresQueryManager extends DataManipulationQueryManager {
   }
 
   async query<T>(queryString: string): Promise<T[]> {
-    console.log('queryString: ', queryString);
     const result: QueryResult<T> = await this.dbConnection.query(queryString);
 
     return result.rows;

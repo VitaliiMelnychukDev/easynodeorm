@@ -1,7 +1,7 @@
 import { ColumnData, ColumnsData } from './column';
 import { EntityValidations, PropertyValidations } from './validation';
 import { PropertyClassType } from '../object';
-import { AllowedTypes } from '../global';
+import { AllowedPropertiesTypes } from '../global';
 import { getRelatedEntity, IntermediateTable, RelationType } from './relations';
 
 export class EntityData {
@@ -15,7 +15,7 @@ export class EntityData {
 
   primaryColumns: string[] = [];
 
-  autoIncrementColumn?: string;
+  autoIncrementedColumn?: string;
 
   relations: Record<string, EntityRelation> = {};
 }
@@ -29,18 +29,18 @@ export type EntityRelation = {
 };
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type EntityDataStoreKeyType = PropertyClassType<unknown> | Function;
+export type EntityDataStoreKey = PropertyClassType<unknown> | Function;
 
-export type EntityDataStoreType = Map<EntityDataStoreKeyType, EntityData>;
+export type EntityDataStore = Map<EntityDataStoreKey, EntityData>;
 
-export type ColumnDataToHandel = {
+export type PreparedColumnsData = {
   name: string;
-  value: AllowedTypes;
+  value: AllowedPropertiesTypes;
 };
 
 export type PreparedEntityData = {
   tableName: string;
-  columns: ColumnDataToHandel[];
+  columns: PreparedColumnsData[];
 };
 
 export type EntityTableAndColumns = Pick<

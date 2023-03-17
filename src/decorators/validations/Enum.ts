@@ -1,20 +1,24 @@
 import { MessageCode } from '../../consts/message';
 import {
-  AllowedValues,
+  AllowedEnumValues,
   EnumProps,
 } from '../../types/entity-data/decorators/enum';
 import {
-  DecoratorDataMethodParams,
+  DecoratorDataMethodProps,
   ValidationDecoratorsMethodReturnType,
 } from '../../types/entity-data/validation';
 import { ObjectType } from '../../types/object';
 import { EntityDataStore } from '../../utils/entity-data';
+import {
+  DecoratorPropertyKey,
+  ValidationDecorator,
+} from '../../types/entity-data/decorator';
 
 const EnumValidator = ({
   value,
   propertyKey,
   props,
-}: DecoratorDataMethodParams<EnumProps>): ValidationDecoratorsMethodReturnType => {
+}: DecoratorDataMethodProps<EnumProps>): ValidationDecoratorsMethodReturnType => {
   if (typeof value !== 'string') {
     return MessageCode.NotValidPropertyType;
   }
@@ -29,12 +33,12 @@ const EnumValidator = ({
 };
 
 const Enum =
-  (allowedValues: AllowedValues): PropertyDecorator =>
-  (target: ObjectType, propertyKey: string | symbol): void => {
+  (allowedValues: AllowedEnumValues): PropertyDecorator =>
+  (target: ObjectType, propertyKey: DecoratorPropertyKey): void => {
     EntityDataStore.setPropertyValidation({
       target,
       propertyKey,
-      decoratorKey: 'enumDecorator',
+      decoratorKey: ValidationDecorator.Enum,
       decoratorProps: {
         props: { allowedValues },
         method: EnumValidator,

@@ -1,6 +1,6 @@
 import { ObjectType, PropertyClassType } from '../../types/object';
 import {
-  ColumnDataToHandel,
+  PreparedColumnsData,
   EntityData,
   EntityRelation,
   EntityTableAndColumns,
@@ -8,11 +8,12 @@ import {
 } from '../../types/entity-data/entity';
 import { EntityDataStore } from './index';
 import { ColumnData } from '../../types/entity-data/column';
-import { Operation } from '../../types/entity-data/validation';
+import { QueryOperation } from '../../types/entity-data/validation';
 
 class Provider {
   private readonly entity: ObjectType;
   private readonly entityData: EntityData;
+
   constructor(
     entityClass: PropertyClassType<unknown>,
     entity: ObjectType = {},
@@ -24,14 +25,14 @@ class Provider {
     this.entity = entity;
   }
 
-  getEntityData(operation: Operation): PreparedEntityData {
+  getEntityData(operation: QueryOperation): PreparedEntityData {
     return {
-      tableName: this.getTableName(),
+      tableName: this.entityData.tableName,
       columns: this.getColumns(operation),
     };
   }
 
-  getPreparedColumns(columns: string[]): ColumnDataToHandel[] {
+  getPreparedColumns(columns: string[]): PreparedColumnsData[] {
     return this.prepareColumns(columns);
   }
 
@@ -50,17 +51,12 @@ class Provider {
     };
   }
 
-  private getTableName(): string {
-    return (
-      this.entityData.tableName || this.entity.constructor.name.toLowerCase()
-    );
-  }
-  private getColumns(operation: Operation): ColumnDataToHandel[] {
+  private getColumns(operation: QueryOperation): PreparedColumnsData[] {
     const columnsToSet: string[] = [...this.entityData.columns];
 
-    if (operation === Operation.Insert) {
+    if (operation === QueryOperation.Insert) {
       this.entityData.primaryColumns.forEach((primaryColumn: string) => {
-        if (this.entityData.autoIncrementColumn !== primaryColumn) {
+        if (this.entityData.autoIncrementedColumn !== primaryColumn) {
           columnsToSet.push(primaryColumn);
         }
       });
@@ -69,7 +65,7 @@ class Provider {
     return this.prepareColumns(columnsToSet);
   }
 
-  private prepareColumns(columnsList: string[]): ColumnDataToHandel[] {
+  private prepareColumns(columnsList: string[]): PreparedColumnsData[] {
     return columnsList.map((column: string) => {
       const columnData = this.entityData.columnsData.get(column);
 

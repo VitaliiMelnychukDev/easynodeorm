@@ -1,5 +1,5 @@
 import { DataDefinitionQueryManagerProps } from './types/queryManager';
-import BaseTableBuilder from './base-query-builders/BaseTableBuilder';
+import BaseTableBuilder from './query-builders/BaseTableBuilder';
 import {
   AddColumnProps,
   ChangeColumnType,
@@ -7,9 +7,9 @@ import {
   DefaultValueTypes,
 } from './types/createTable';
 import { Operation } from './consts/operation';
-import BaseForeignKeyBuilder from './base-query-builders/BaseForeignKeyBuilder';
+import BaseForeignKeyBuilder from './query-builders/BaseForeignKeyBuilder';
 import { ForeignKey } from './types/foreignKey';
-import BaseIndexBuilder from './base-query-builders/BaseIndexBuilder';
+import BaseIndexBuilder from './query-builders/BaseIndexBuilder';
 import { Index } from './types';
 
 abstract class DataDefinitionQueryManager<AllowedTypes> {

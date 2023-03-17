@@ -5,7 +5,7 @@ import {
   PrimaryAutoIncrementColumn,
 } from '../../decorators';
 import User from './User';
-import OneToMany from '../../decorators/relations/OneToMany';
+import { OneToMany } from '../../decorators';
 
 @Entity('addresses')
 class Address {

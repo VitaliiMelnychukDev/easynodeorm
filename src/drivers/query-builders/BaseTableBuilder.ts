@@ -7,28 +7,9 @@ import {
 import QueryBuilderHelper from '../helpers/QueryBuilderHelper';
 import WrongTableQuery from '../../error/WrongTableQuery';
 import TableBuilder from '../types/builders/TableBuilder';
-import { alterTableStatement } from '../consts/sqlStatements';
 
 class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
   private beforeSqlQueries: string[] = [];
-  public dbEnumType = 'ENUM';
-  public defaultStatement = 'DEFAULT';
-  public notNullStatement = 'NOT NULL';
-  public autoIncrementStatement = 'AUTO_INCREMENT';
-  public unsignedStatement = 'UNSIGNED';
-  public createTableStatement = 'CREATE TABLE IF NOT EXISTS';
-  public dropTableStatement = 'DROP TABLE IF EXISTS';
-  public primaryKeyStatement = 'PRIMARY KEY';
-  public uniqueStatement = 'UNIQUE';
-  public alterTableStatement = alterTableStatement;
-  public addColumnStatement = 'ADD COLUMN';
-  public dropColumnStatement = 'DROP COLUMN';
-  public renameColumnStatement = 'RENAME COLUMN';
-  public alterColumnStatement = 'ALTER COLUMN';
-  public dropDefaultStatement = 'DROP DEFAULT';
-  public setDefaultStatement = 'SET DEFAULT';
-  public typeStatement = 'TYPE';
-  public usingStatement = 'USING';
 
   public addBeforeSql(query: string): void {
     this.beforeSqlQueries.push(query);
@@ -49,18 +30,18 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
     if (column.autoGenerationStrategy) return '';
 
     return column.default !== undefined
-      ? `${this.defaultStatement} ${
+      ? `DEFAULT ${
           column.default !== null
             ? QueryBuilderHelper.prepareValue(column.default)
             : null
         }`
-      : this.notNullStatement;
+      : 'NOT NULL';
   }
 
   public getUnsignedPart(
     isUnsigned?: ColumnProps<AllowedTypes>['isUnsigned'],
   ): string {
-    return isUnsigned ? this.unsignedStatement : '';
+    return isUnsigned ? 'UNSIGNED' : '';
   }
 
   public getEnumColumn(column: ColumnProps<AllowedTypes>): string {
@@ -75,7 +56,7 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
     }
 
     return `${column.name} ${this.getColumnTypePart(
-      this.dbEnumType,
+      'ENUM',
       column.length,
     )} ${QueryBuilderHelper.getEnumValuesQuery(column.enum)})`;
   }
@@ -90,7 +71,7 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
   }
 
   public getAutoIncrementedColumn(column: ColumnProps<AllowedTypes>): string {
-    return `${this.getSimpleColumn(column)} ${this.autoIncrementStatement}`;
+    return `${this.getSimpleColumn(column)} AUTO_INCREMENT`;
   }
 
   public getColumn(column: ColumnProps<AllowedTypes>): string {
@@ -116,13 +97,11 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
       }
     });
 
-    return primaryKeys.length
-      ? `${this.primaryKeyStatement} (${primaryKeys.join(',')})`
-      : '';
+    return primaryKeys.length ? `PRIMARY KEY (${primaryKeys.join(',')})` : '';
   }
 
   public getUniqueColumnConstraint(columnName: string): string {
-    return `${this.uniqueStatement}(${columnName})`;
+    return `UNIQUE(${columnName})`;
   }
 
   public getConstraints(columns: ColumnProps<AllowedTypes>[]): string[] {
@@ -174,7 +153,7 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
     this.validateTableName(tableName, 'Create table');
     this.validateColumns(columns);
 
-    const mainQuery = `${this.createTableStatement} ${tableName} (${[
+    const mainQuery = `CREATE TABLE IF NOT EXISTS ${tableName} (${[
       ...this.getColumns(columns),
       ...this.getConstraints(columns),
     ].join(',')})`;
@@ -184,7 +163,8 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
 
   public getDropTableSql(tableName: string): string {
     this.validateTableName(tableName, 'Drop table');
-    return `${this.dropTableStatement} ${tableName}`;
+
+    return `DROP TABLE IF EXISTS ${tableName}`;
   }
 
   public getAddColumnSql(
@@ -194,9 +174,9 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
     this.validateTableName(tableName, 'Add Column ');
     this.validateColumn(column);
 
-    const mainQuery = `${this.alterTableStatement} ${tableName} ${
-      this.addColumnStatement
-    } ${this.getColumn(column)} ${column.isUnique ? this.uniqueStatement : ''}`;
+    const mainQuery = `ALTER TABLE ${tableName} ADD COLUMN ${this.getColumn(
+      column,
+    )} ${column.isUnique ? 'UNIQUE' : ''}`;
 
     return `${this.getBeforeSqlQueries()} ${mainQuery}`;
   }
@@ -209,7 +189,7 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
       );
     }
 
-    return `${this.alterTableStatement} ${tableName} ${this.dropColumnStatement} ${columnName}`;
+    return `ALTER TABLE ${tableName} DROP COLUMN ${columnName}`;
   }
 
   public getRenameColumnSql(
@@ -223,14 +203,14 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
       );
     }
 
-    return `${this.alterTableStatement} ${tableName} ${this.renameColumnStatement} ${oldColumnName} TO ${newColumnName}`;
+    return `ALTER TABLE ${tableName} RENAME COLUMN ${oldColumnName} TO ${newColumnName}`;
   }
 
   public getAlterColumnDefaultPart(
     tableName: string,
     columnName: string,
   ): string {
-    return `${this.alterTableStatement} ${tableName} ${this.alterColumnStatement} ${columnName}`;
+    return `ALTER TABLE ${tableName} ALTER COLUMN ${columnName}`;
   }
 
   public getDropColumnDefaultValueSql(
@@ -244,9 +224,10 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
       );
     }
 
-    return `${this.getAlterColumnDefaultPart(tableName, columnName)} ${
-      this.dropDefaultStatement
-    }`;
+    return `${this.getAlterColumnDefaultPart(
+      tableName,
+      columnName,
+    )} DROP DEFAULT`;
   }
 
   public getSetColumnDefaultValueSql(
@@ -261,13 +242,14 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
       );
     }
 
-    return `${this.getAlterColumnDefaultPart(tableName, columnName)} ${
-      this.setDefaultStatement
-    } ${QueryBuilderHelper.prepareValue(defaultValue)}`;
+    return `${this.getAlterColumnDefaultPart(
+      tableName,
+      columnName,
+    )} SET DEFAULT ${QueryBuilderHelper.prepareValue(defaultValue)}`;
   }
 
   public getUsingPart(usingPart: string): string {
-    return usingPart ? `${this.usingStatement} ${usingPart}` : '';
+    return usingPart ? `USING ${usingPart}` : '';
   }
   public getChangeColumnTypeSql(
     tableName: string,
@@ -280,9 +262,10 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
       );
     }
 
-    return `${this.getAlterColumnDefaultPart(tableName, column.name)} ${
-      this.typeStatement
-    } ${this.getColumnTypePart(
+    return `${this.getAlterColumnDefaultPart(
+      tableName,
+      column.name,
+    )} TYPE ${this.getColumnTypePart(
       column.newType,
       column.length,
     )} ${this.getUsingPart(column.usingPart)}`;

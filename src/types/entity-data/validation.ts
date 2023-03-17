@@ -1,35 +1,38 @@
-import LengthProps from './decorators/length';
+import { LengthProps } from './decorators/length';
 import { MessageCode } from '../../consts/message';
 import { EnumProps } from './decorators/enum';
+import { ValidationDecorator } from './decorator';
 
 export type ValidationDecoratorsMethodReturnType = string | null | MessageCode;
-export type BaseDecoratorDataMethodParams = {
+
+export type BaseDecoratorMethodProps = {
   value: unknown;
   propertyKey: string;
 };
 
-export type DecoratorDataMethodParams<T> = BaseDecoratorDataMethodParams & {
-  props: T;
-};
+export type DecoratorDataMethodProps<DecoratorProps> =
+  BaseDecoratorMethodProps & {
+    props: DecoratorProps;
+  };
 
-type DecoratorData<T> = {
-  props: T;
+type DecoratorData<DecoratorProps> = {
+  props: DecoratorProps;
   method: (
-    params: DecoratorDataMethodParams<T>,
+    params: DecoratorDataMethodProps<DecoratorProps>,
   ) => ValidationDecoratorsMethodReturnType;
 };
 
 type NoParamsDecoratorData = {
   method: (
-    params: BaseDecoratorDataMethodParams,
+    params: BaseDecoratorMethodProps,
   ) => ValidationDecoratorsMethodReturnType;
 };
 
 export type SupportedDecorators = {
-  lengthDecorator: DecoratorData<LengthProps>;
-  enumDecorator: DecoratorData<EnumProps>;
-  isInteger: NoParamsDecoratorData;
-  isUnsigned: NoParamsDecoratorData;
+  [ValidationDecorator.Length]: DecoratorData<LengthProps>;
+  [ValidationDecorator.Enum]: DecoratorData<EnumProps>;
+  [ValidationDecorator.IsInteger]: NoParamsDecoratorData;
+  [ValidationDecorator.IsUnsigned]: NoParamsDecoratorData;
 };
 
 export type SupportedDecoratorsKeys = keyof SupportedDecorators;
@@ -40,13 +43,13 @@ export type PropertyValidations = {
 
 export type EntityValidations = Map<string, PropertyValidations>;
 
-export const isDecoratorData = <T>(
-  decoratorValue: NoParamsDecoratorData | DecoratorData<T>,
-): decoratorValue is DecoratorData<T> => {
-  return (<DecoratorData<T>>decoratorValue).props !== undefined;
+export const isDecoratorData = <DecoratorProps>(
+  decoratorValue: NoParamsDecoratorData | DecoratorData<DecoratorProps>,
+): decoratorValue is DecoratorData<DecoratorProps> => {
+  return (<DecoratorData<DecoratorProps>>decoratorValue).props !== undefined;
 };
 
-export enum Operation {
+export enum QueryOperation {
   Update = 'Update',
   Insert = 'Insert',
 }

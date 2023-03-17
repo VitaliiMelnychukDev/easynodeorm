@@ -1,7 +1,7 @@
 import { ColumnProps } from '../../drivers/types/createTable';
-import { AllowedTypes } from '../../drivers/postgress/types/types';
+import { AllowedPostgresTypes } from '../../drivers/postgress/types/types';
 
-export const columnsUserTags: ColumnProps<AllowedTypes>[] = [
+export const columnsUserTags: ColumnProps<AllowedPostgresTypes>[] = [
   {
     name: 'user_id',
     type: 'int',

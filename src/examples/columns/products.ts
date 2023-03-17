@@ -1,12 +1,15 @@
-import { ColumnProps } from '../../drivers/types/createTable';
-import { AllowedTypes } from '../../drivers/postgress/types/types';
+import {
+  AutoGenerationStrategy,
+  ColumnProps,
+} from '../../drivers/types/createTable';
+import { AllowedPostgresTypes } from '../../drivers/postgress/types/types';
 
-export const columnsProducts: ColumnProps<AllowedTypes>[] = [
+export const columnsProducts: ColumnProps<AllowedPostgresTypes>[] = [
   {
     name: 'id',
     type: 'int',
     isPrimary: true,
-    autoGenerationStrategy: 'increment',
+    autoGenerationStrategy: AutoGenerationStrategy.Increment,
   },
   {
     name: 'name',

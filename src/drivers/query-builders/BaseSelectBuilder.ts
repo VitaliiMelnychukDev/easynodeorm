@@ -10,7 +10,7 @@ import {
 } from '../types/column';
 import {
   Between,
-  ColumnCondition,
+  ColumnsCondition,
   Condition,
   ConditionValues,
   DefaultTypeOrSubQuery,
@@ -26,23 +26,12 @@ import {
 } from '../types/where';
 import QueryBuilderHelper from '../helpers/QueryBuilderHelper';
 import WrongSelectQuery from '../../error/WrongSelectQuery';
-import { AllowedTypesToMakeQueryWith } from '../../types/global';
+import { AllowedTypesToUseInSqlQuery } from '../../types/global';
 import { Order, OrderBy } from '../types/order';
 import { Join, JoinVariant } from '../types/join';
 import SelectBuilder from '../types/builders/SelectBuilder';
-import { fromStatement } from '../consts/sqlStatements';
 
 class BaseSelectBuilder implements SelectBuilder {
-  public distinctStatement = 'DISTINCT';
-  public selectStatement = 'SELECT';
-  public fromStatement = fromStatement;
-  public whereStatement = 'WHERE';
-  public groupByStatement = 'GROUP BY';
-  public havingStatement = 'HAVING';
-  public limitStatement = 'LIMIT';
-  public offsetStatement = 'OFFSET';
-  public orderByStatement = 'ORDER BY';
-
   getAliasPart(alias: string): string {
     return alias ? `AS ${alias}` : '';
   }
@@ -59,7 +48,7 @@ class BaseSelectBuilder implements SelectBuilder {
     if (isSubQueryWithAlias(table)) {
       const tableQuery = this.getSelectSql(table.subQuery);
 
-      return `(${tableQuery}) AS ${table.alias}`;
+      return `(${tableQuery}) ${this.getAliasPart(table.alias)}`;
     }
 
     if (isRequiredAlias(table)) {
@@ -74,7 +63,7 @@ class BaseSelectBuilder implements SelectBuilder {
   }
 
   getDistinctColumn(distinctColumn: DistinctColumn): string {
-    const distinctSql = distinctColumn.distinct ? this.distinctStatement : '';
+    const distinctSql = distinctColumn.distinct ? 'DISTINCT' : '';
 
     return `${distinctSql} ${distinctColumn.name} ${this.getAliasPart(
       distinctColumn.alias,
@@ -160,7 +149,7 @@ class BaseSelectBuilder implements SelectBuilder {
     }
   }
 
-  getConditionValue(value: DefaultTypeOrSubQuery): AllowedTypesToMakeQueryWith {
+  getConditionValue(value: DefaultTypeOrSubQuery): AllowedTypesToUseInSqlQuery {
     return isSelect(value)
       ? `(${this.getSelectSql(value)})`
       : QueryBuilderHelper.prepareValue(value);
@@ -198,10 +187,10 @@ class BaseSelectBuilder implements SelectBuilder {
     )}`;
   }
 
-  getSingleCondition<T extends SupportedConditionOperators>(
+  getSingleCondition<ConditionOperation extends SupportedConditionOperators>(
     column: string,
-    operation: T,
-    values: ConditionValues[T],
+    operation: ConditionOperation,
+    values: ConditionValues[ConditionOperation],
   ): string {
     const sqlOperator = this.getSQLOperatorByOperation(operation);
 
@@ -243,14 +232,14 @@ class BaseSelectBuilder implements SelectBuilder {
   }
 
   getColumnConditions(
-    columnConditions: ColumnCondition<string>,
+    columnsConditions: ColumnsCondition<string>,
     logicalOperatorToConnect = LogicalOperator.And,
   ): string {
-    const columnNames = Object.keys(columnConditions);
+    const columnNames = Object.keys(columnsConditions);
     const equalMark = this.getSQLOperatorByOperation('equal');
 
-    const columnConditionsSql = columnNames.map((columnName) => {
-      const columnValue = columnConditions[columnName];
+    const columnsConditionsSql = columnNames.map((columnName) => {
+      const columnValue = columnsConditions[columnName];
 
       if (isDefaultType(columnValue)) {
         return this.getSimpleCondition(columnName, equalMark, columnValue);
@@ -259,11 +248,11 @@ class BaseSelectBuilder implements SelectBuilder {
       return this.getConditions(columnName, columnValue);
     });
 
-    const connectedColumnConditionsSql = columnConditionsSql.join(
+    const connectedColumnConditionsSql = columnsConditionsSql.join(
       ` ${this.getSQLLogicalOperator(logicalOperatorToConnect)} `,
     );
 
-    return columnConditionsSql.length > 1
+    return columnsConditionsSql.length > 1
       ? `(${connectedColumnConditionsSql})`
       : connectedColumnConditionsSql;
   }
@@ -297,15 +286,11 @@ class BaseSelectBuilder implements SelectBuilder {
   }
 
   getWhereSql(where?: Where<string>): string {
-    return where
-      ? `${this.whereStatement} ${this.getWhereConditions(where)}`
-      : '';
+    return where ? `WHERE ${this.getWhereConditions(where)}` : '';
   }
 
   getHaving(where?: Where<string>): string {
-    return where
-      ? `${this.havingStatement} ${this.getWhereConditions(where)}`
-      : '';
+    return where ? `HAVING ${this.getWhereConditions(where)}` : '';
   }
 
   getGroupBy(columns?: string[]): string {
@@ -319,7 +304,7 @@ class BaseSelectBuilder implements SelectBuilder {
       }
     });
 
-    return `${this.groupByStatement} ${columns.join(',')}`;
+    return `GROUP BY ${columns.join(',')}`;
   }
 
   getLimit(limit?: number): string {
@@ -331,7 +316,7 @@ class BaseSelectBuilder implements SelectBuilder {
       );
     }
 
-    return `${this.limitStatement} ${limit}`;
+    return `LIMIT ${limit}`;
   }
 
   getOffset(offset?: number): string {
@@ -343,7 +328,7 @@ class BaseSelectBuilder implements SelectBuilder {
       );
     }
 
-    return `${this.offsetStatement} ${offset}`;
+    return `OFFSET ${offset}`;
   }
 
   getSqlOrder(order: Order): string {
@@ -370,7 +355,7 @@ class BaseSelectBuilder implements SelectBuilder {
       return `${orderBy.column} ${orderSql}`;
     });
 
-    return `${this.orderByStatement} ${orderBySqlParts.join(',')}`;
+    return `ORDER BY ${orderBySqlParts.join(',')}`;
   }
 
   getSqlJoin(join: JoinVariant): string {
@@ -391,15 +376,15 @@ class BaseSelectBuilder implements SelectBuilder {
 
     return joins
       .map((join) => {
-        if (!join.table || !join.on.column || !join.on.joinTableColumn) {
+        if (!join.table || !join.on.column || !join.on.joinedTableColumn) {
           throw new WrongSelectQuery(
-            'Select Query: join can not have empty table, on.column or on.joinTableColumn values',
+            'Select Query: join can not have empty table, on.column or on.joinedTableColumn values',
           );
         }
 
         return `${this.getSqlJoin(join.type)} ${this.getTableName(
           join.table,
-        )} ON ${join.on.column} = ${join.on.joinTableColumn}`;
+        )} ON ${join.on.column} = ${join.on.joinedTableColumn}`;
       })
       .join(' ');
   }
@@ -424,7 +409,7 @@ class BaseSelectBuilder implements SelectBuilder {
     const limitSql = this.getLimit(options.limit);
     const offsetSql = this.getOffset(options.offset);
 
-    return `${this.selectStatement} ${columnsSql} ${this.fromStatement} ${tableNameSql} ${joinsSql} ${whereSql} ${groupBySql} ${havingSql} ${orderBySql} ${limitSql} ${offsetSql}`;
+    return `SELECT ${columnsSql} FROM ${tableNameSql} ${joinsSql} ${whereSql} ${groupBySql} ${havingSql} ${orderBySql} ${limitSql} ${offsetSql}`;
   }
 }
 

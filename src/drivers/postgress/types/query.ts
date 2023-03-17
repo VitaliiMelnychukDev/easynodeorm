@@ -1,5 +1,5 @@
-export type QueryResult<T> = {
+export type QueryResult<Row> = {
   command: string;
   rowCount: number;
-  rows: T[];
+  rows: Row[];
 };

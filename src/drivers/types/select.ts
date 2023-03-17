@@ -3,7 +3,7 @@ import { Join } from './join';
 import { Where } from './where';
 import { Column } from './column';
 import { Table } from './table';
-import { PropertyKeyTypes } from '../../types/global';
+import { PropertyKeyTypes } from '../../types/object';
 
 export type Select<ColumnNames extends PropertyKeyTypes> = {
   table: Table;

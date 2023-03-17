@@ -1,5 +1,5 @@
-export type AllowedValues = string[];
+export type AllowedEnumValues = string[];
 
 export type EnumProps = {
-  allowedValues: AllowedValues;
+  allowedValues: AllowedEnumValues;
 };

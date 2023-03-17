@@ -5,10 +5,16 @@ import {
   DefaultValueTypes,
 } from '../createTable';
 
-interface TableBuilder<T> {
-  getCreateTableSql(tableName: string, columns: ColumnProps<T>[]): string;
+interface TableBuilder<AllowedTypes> {
+  getCreateTableSql(
+    tableName: string,
+    columns: ColumnProps<AllowedTypes>[],
+  ): string;
   getDropTableSql(tableName: string): string;
-  getAddColumnSql(tableName: string, column: AddColumnProps<T>): string;
+  getAddColumnSql(
+    tableName: string,
+    column: AddColumnProps<AllowedTypes>,
+  ): string;
   getDropColumnSql(tableName: string, columnName: string): string;
   getRenameColumnSql(
     tableName: string,
@@ -23,7 +29,7 @@ interface TableBuilder<T> {
   ): string;
   getChangeColumnTypeSql(
     tableName: string,
-    column: ChangeColumnType<T>,
+    column: ChangeColumnType<AllowedTypes>,
   ): string;
 }
 

@@ -12,6 +12,6 @@ export type Join = {
   table: Table;
   on: {
     column: string;
-    joinTableColumn: string;
+    joinedTableColumn: string;
   };
 };

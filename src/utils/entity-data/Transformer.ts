@@ -1,12 +1,12 @@
 import { ObjectType, PropertyClassType } from '../../types/object';
 import { EntityDataProvider, EntityDataStore } from './index';
 import {
-  ColumnCondition,
+  ColumnsCondition,
   isLogicalWhere,
   Where,
 } from '../../drivers/types/where';
 import { EntityTableAndColumns } from '../../types/entity-data/entity';
-import WrongWhereParamsToQuery from '../../error/WrongWhereParamsToQuery';
+import WrongWhereParamsQuery from '../../error/WrongWhereParamsQuery';
 
 class Transformer {
   public static transformArrayToEntities<Entity>(
@@ -42,7 +42,7 @@ class Transformer {
     return entity;
   }
 
-  public static prepareWhereBeforeRequest(
+  public static prepareWhereForQuery(
     where: Where<string>,
     entityData: EntityTableAndColumns,
   ): Where<string> {
@@ -52,11 +52,11 @@ class Transformer {
       preparedWhere = {
         logicalOperator: where.logicalOperator,
         conditions: where.conditions.map((condition) =>
-          this.prepareWhereBeforeRequest(condition, entityData),
+          this.prepareWhereForQuery(condition, entityData),
         ),
       };
     } else {
-      const preparedColumnConditions: ColumnCondition<string> = {};
+      const preparedColumnConditions: ColumnsCondition<string> = {};
 
       const columnKeys = Object.keys(where);
       columnKeys.forEach((columnKey) => {
@@ -64,7 +64,7 @@ class Transformer {
           !entityData.columns.includes(columnKey) &&
           !entityData.primaryColumns.includes(columnKey)
         ) {
-          throw new WrongWhereParamsToQuery(
+          throw new WrongWhereParamsQuery(
             `Only ${entityData.tableName} entity properties are available. Relation fields are forbidden`,
           );
         }
