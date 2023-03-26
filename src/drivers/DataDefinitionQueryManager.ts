@@ -10,7 +10,7 @@ import { Operation } from './consts/operation';
 import BaseForeignKeyBuilder from './query-builders/BaseForeignKeyBuilder';
 import { ForeignKey } from './types/foreignKey';
 import BaseIndexBuilder from './query-builders/BaseIndexBuilder';
-import { Index } from './types';
+import { IndexTypes } from './types/indexTypes';
 
 abstract class DataDefinitionQueryManager<AllowedTypes> {
   abstract query(query: string, operation: string): Promise<unknown>;
@@ -66,7 +66,7 @@ abstract class DataDefinitionQueryManager<AllowedTypes> {
     return await this.query(dropForeignKeyQuery, Operation.DropForeignKey);
   }
 
-  async createIndex(index: Index): Promise<unknown> {
+  async createIndex(index: IndexTypes): Promise<unknown> {
     const createIndexQuery =
       this.queryBuilders.indexBuilder.getCreateIndexSql(index);
 

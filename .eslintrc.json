@@ -26,5 +26,6 @@
                 "alwaysTryTypes": true
             }
         }
-    }
+    },
+    "ignorePatterns": ["src/test/*", "src/examples/*"]
 }

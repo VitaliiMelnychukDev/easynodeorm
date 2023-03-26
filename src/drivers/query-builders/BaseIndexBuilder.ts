@@ -1,9 +1,9 @@
-import { Index } from '../types';
+import { IndexTypes } from '../types/indexTypes';
 import WrongIndexQuery from '../../error/WrongIndexQuery';
 import IndexBuilder from '../types/builders/IndexBuilder';
 
 class BaseIndexBuilder implements IndexBuilder {
-  validateIndex(index: Index): void {
+  validateIndex(index: IndexTypes): void {
     if (!index.table || !index.indexName || !index.tableColumns.length) {
       throw new WrongIndexQuery(
         'table, indexKeyName, tableColumns params can not be empty in create index query.',
@@ -11,7 +11,7 @@ class BaseIndexBuilder implements IndexBuilder {
     }
   }
 
-  getCreateIndexSql(index: Index): string {
+  getCreateIndexSql(index: IndexTypes): string {
     index.tableColumns = index.tableColumns.filter(
       (tableColumn) => !!tableColumn,
     );

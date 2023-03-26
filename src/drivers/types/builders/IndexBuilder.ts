@@ -1,7 +1,7 @@
-import { Index } from '../index';
+import { IndexTypes } from '../indexTypes';
 
 interface IndexBuilder {
-  getCreateIndexSql(index: Index): string;
+  getCreateIndexSql(index: IndexTypes): string;
   getDropIndexSql(indexName: string): string;
 }
 
