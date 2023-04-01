@@ -31,5 +31,5 @@ const testCreate = async (): Promise<void> => {
 
   user.tags = [musicTag];
 
-  return await user.create(['all']);
+  await user.create(['all']);
 };
