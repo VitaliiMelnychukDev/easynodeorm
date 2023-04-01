@@ -1,6 +1,6 @@
 class FileHelper {
   public static getProjectDefaultDataLoaderPath(): string {
-    return `${process.cwd()}\\dataSource.ts`;
+    return `${process.cwd()}\\dataSource.js`;
   }
 }
 

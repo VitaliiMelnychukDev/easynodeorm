@@ -5,8 +5,8 @@ import DeleteEntityHelper from './utils/entity/DeleteEntityHelper';
 import SelectEntityHelper from './utils/entity/SelectEntityHelper';
 import UpdateEntityHelper from './utils/entity/UpdateEntityHelper';
 import FileHelper from '../helpers/FileHelper';
-import { isValidDataSource } from '../types/global';
 import WrongDataSource from '../error/WrongDataSource';
+import DataSource from '../data-source/DataSource';
 
 abstract class BaseModel {
   protected readonly queryManager: DataManipulationQueryManager;
@@ -35,17 +35,21 @@ abstract class BaseModel {
     const path = FileHelper.getProjectDefaultDataLoaderPath();
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const dataSourceFile = require(path);
-    if (
-      !dataSourceFile ||
-      !dataSourceFile.default ||
-      !isValidDataSource(dataSourceFile.default)
-    ) {
+    if (!dataSourceFile || !dataSourceFile.options) {
       throw new WrongDataSource(
         'Please create valid dataSource.ts at your root folder to create models',
       );
     }
 
-    return dataSourceFile.default.queryManager;
+    try {
+      const dataSource = DataSource.getDataSource(dataSourceFile.options);
+
+      return dataSource.queryManager;
+    } catch {
+      throw new WrongDataSource(
+        'Data Source creation error. Please set up valid dataSource.js at your root folder',
+      );
+    }
   }
 
   private static getSelectEntityHelper(): SelectEntityHelper {
