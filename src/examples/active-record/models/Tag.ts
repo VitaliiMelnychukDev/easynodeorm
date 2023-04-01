@@ -6,7 +6,7 @@ import {
   ManyToMany,
 } from '../../../decorators';
 import User from './User';
-import BaseModel from './BaseModel';
+import BaseModel from '../../../drivers/BaseModel';
 
 @Entity('tags')
 class Tag extends BaseModel {

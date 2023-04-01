@@ -3,7 +3,7 @@ import User from './models/User';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const testSelect = async (): Promise<void> => {
-  const user = await new User().get({ id: 77 });
+  const user = await User.getOne<User>({ id: 77 });
 
   await user.populate(['all']);
 

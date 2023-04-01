@@ -6,7 +6,7 @@ import {
 } from '../../../decorators';
 import User from './User';
 import { OneToMany } from '../../../decorators';
-import BaseModel from './BaseModel';
+import BaseModel from '../../../drivers/BaseModel';
 
 @Entity('addresses')
 class Address extends BaseModel {

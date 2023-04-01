@@ -8,7 +8,7 @@ import {
   ManyToOne,
 } from '../../../decorators';
 import User from './User';
-import BaseModel from './BaseModel';
+import BaseModel from '../../../drivers/BaseModel';
 
 @Entity('products')
 class Product extends BaseModel {

@@ -11,7 +11,7 @@ import Address from './Address';
 import { OneToOne, OneToMany, ManyToMany } from '../../../decorators';
 import Product from './Product';
 import Tag from './Tag';
-import BaseModel from './BaseModel';
+import BaseModel from '../../../drivers/BaseModel';
 
 export enum Role {
   Admin = 'Admin',

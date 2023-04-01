@@ -4,6 +4,9 @@ import DataManipulationQueryManager from './DataManipulationQueryManager';
 import DeleteEntityHelper from './utils/entity/DeleteEntityHelper';
 import SelectEntityHelper from './utils/entity/SelectEntityHelper';
 import UpdateEntityHelper from './utils/entity/UpdateEntityHelper';
+import FileHelper from '../helpers/FileHelper';
+import { isValidDataSource } from '../types/global';
+import WrongDataSource from '../error/WrongDataSource';
 
 abstract class BaseModel {
   protected readonly queryManager: DataManipulationQueryManager;
@@ -15,8 +18,8 @@ abstract class BaseModel {
   protected readonly selectEntityHelper: SelectEntityHelper;
 
   protected readonly updateEntityHelper: UpdateEntityHelper;
-  protected constructor(queryManager: DataManipulationQueryManager) {
-    this.queryManager = queryManager;
+  constructor() {
+    this.queryManager = BaseModel.getQueryManager();
     this.insertEntityHelper = new InsertEntityHelper(this.queryManager);
     this.deleteEntityHelper = new DeleteEntityHelper(this.queryManager);
     this.selectEntityHelper = new SelectEntityHelper(this.queryManager);
@@ -25,6 +28,30 @@ abstract class BaseModel {
       this.insertEntityHelper,
       this.selectEntityHelper,
     );
+    BaseModel.getQueryManager();
+  }
+
+  private static getQueryManager(): DataManipulationQueryManager {
+    const path = FileHelper.getProjectDefaultDataLoaderPath();
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const dataSourceFile = require(path);
+    if (
+      !dataSourceFile ||
+      !dataSourceFile.default ||
+      !isValidDataSource(dataSourceFile.default)
+    ) {
+      throw new WrongDataSource(
+        'Please create valid dataSource.ts at your root folder to create models',
+      );
+    }
+
+    return dataSourceFile.default.queryManager;
+  }
+
+  private static getSelectEntityHelper(): SelectEntityHelper {
+    const queryManager = BaseModel.getQueryManager();
+
+    return new SelectEntityHelper(queryManager);
   }
   async create(withRelations: WithRelations<this>[] = []): Promise<this> {
     return await this.insertEntityHelper.create(
@@ -38,8 +65,10 @@ abstract class BaseModel {
     return await this.deleteEntityHelper.deleteEntity(this, this.constructor);
   }
 
-  async get(where: Where<keyof this>): Promise<this | null> {
-    return await this.selectEntityHelper.getOne(where, this.constructor);
+  public static async getOne<Entity>(
+    where: Where<keyof Entity>,
+  ): Promise<Entity | null> {
+    return await BaseModel.getSelectEntityHelper().getOne(where, this);
   }
 
   async populate(withRelations: WithRelations<this>[] = []): Promise<this> {
