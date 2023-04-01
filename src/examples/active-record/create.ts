@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import User, { Role } from './models/User';
 import Address from './models/Address';
 import Product from './models/Product';
