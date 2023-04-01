@@ -37,7 +37,7 @@ abstract class BaseModel {
     const dataSourceFile = require(path);
     if (!dataSourceFile || !dataSourceFile.options) {
       throw new WrongDataSource(
-        'Please create valid dataSource.ts at your root folder to create models',
+        'Please create valid dataSource.js at your root folder to create models. dataSource.js should return options.',
       );
     }
 
@@ -47,7 +47,7 @@ abstract class BaseModel {
       return dataSource.queryManager;
     } catch {
       throw new WrongDataSource(
-        'Data Source creation error. Please set up valid dataSource.js at your root folder',
+        'Data Source creation error. Please set up valid dataSource.js at your root folder. dataSource.js should return options.',
       );
     }
   }
