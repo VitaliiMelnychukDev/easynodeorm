@@ -1,4 +1,4 @@
-import postgresDataSource from './postgresDataSource';
+import postgresDataSource from '../postgresDataSource';
 import Product from './entities/Product';
 import Tag from './entities/Tag';
 import User from './entities/User';

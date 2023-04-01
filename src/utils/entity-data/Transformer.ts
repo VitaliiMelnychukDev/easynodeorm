@@ -1,17 +1,16 @@
-import { ObjectType, PropertyClassType } from '../../types/object';
+import { ObjectType } from '../../types/object';
 import { EntityDataProvider, EntityDataStore } from './index';
+import { ColumnsCondition, isLogicalWhere, Where } from '../../drivers/types';
 import {
-  ColumnsCondition,
-  isLogicalWhere,
-  Where,
-} from '../../drivers/types/where';
-import { EntityTableAndColumns } from '../../types/entity-data/entity';
+  EntityDataStoreKey,
+  EntityTableAndColumns,
+} from '../../types/entity-data/entity';
 import WrongWhereParamsQuery from '../../error/WrongWhereParamsQuery';
 
 class Transformer {
   public static transformArrayToEntities<Entity>(
     objectsToTransform: ObjectType[],
-    entityClass: PropertyClassType<Entity>,
+    entityClass: EntityDataStoreKey,
   ): Entity[] {
     return objectsToTransform.map((objectToTransform) =>
       Transformer.transformToEntity(objectToTransform, entityClass),
@@ -20,8 +19,10 @@ class Transformer {
 
   public static transformToEntity<Entity>(
     objectToTransform: ObjectType,
-    entityClass: PropertyClassType<Entity>,
+    entityClass: EntityDataStoreKey,
   ): Entity {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const entity = new entityClass();
 
     const entityData = EntityDataStore.getEntityDataOrThrowError(

@@ -3,12 +3,13 @@ import {
   Entity,
   Length,
   PrimaryAutoIncrementColumn,
-} from '../../decorators';
+} from '../../../decorators';
 import User from './User';
-import { OneToMany } from '../../decorators';
+import { OneToMany } from '../../../decorators';
+import BaseModel from './BaseModel';
 
 @Entity('addresses')
-class Address {
+class Address extends BaseModel {
   @PrimaryAutoIncrementColumn()
   id: number;
 

@@ -6,7 +6,7 @@ import {
   Length,
   PrimaryAutoIncrementColumn,
   ManyToOne,
-} from '../../decorators';
+} from '../../../decorators';
 import User from './User';
 
 @Entity('products')

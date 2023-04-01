@@ -1,4 +1,4 @@
-import postgresDataSource from './postgresDataSource';
+import postgresDataSource from '../postgresDataSource';
 import Product from './entities/Product';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -6,9 +6,9 @@ import {
   IsUnsigned,
   Length,
   PrimaryAutoIncrementColumn,
-} from '../../decorators';
+} from '../../../decorators';
 import Address from './Address';
-import { OneToOne, OneToMany, ManyToMany } from '../../decorators';
+import { OneToOne, OneToMany, ManyToMany } from '../../../decorators';
 import Product from './Product';
 import Tag from './Tag';
 

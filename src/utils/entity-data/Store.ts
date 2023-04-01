@@ -6,7 +6,7 @@ import {
   EntityDataStore,
   EntityRelation,
 } from '../../types/entity-data/entity';
-import { ObjectType, PropertyClassType } from '../../types/object';
+import { ObjectType } from '../../types/object';
 import WrongEntityError from '../../error/WrongEntityError';
 import { ColumnDecoratorProps } from '../../types/entity-data/decorators/column';
 import { RelationType } from '../../types/entity-data/relations';
@@ -157,7 +157,7 @@ class Store {
   }
 
   public static getEntityDataOrThrowError(
-    entity: PropertyClassType<unknown>,
+    entity: EntityDataStoreKey,
     entityName = '',
   ): EntityData {
     const entityData = Store.getEntityDataByFunction(entity);

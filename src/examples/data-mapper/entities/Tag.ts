@@ -4,7 +4,7 @@ import {
   Length,
   PrimaryAutoIncrementColumn,
   ManyToMany,
-} from '../../decorators';
+} from '../../../decorators';
 import User from './User';
 
 @Entity('tags')

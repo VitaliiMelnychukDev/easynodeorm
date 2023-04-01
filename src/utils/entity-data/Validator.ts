@@ -1,4 +1,8 @@
-import { EntityData, EntityRelation } from '../../types/entity-data/entity';
+import {
+  EntityData,
+  EntityDataStoreKey,
+  EntityRelation,
+} from '../../types/entity-data/entity';
 import WrongEntityError from '../../error/WrongEntityError';
 import WrongPropertyError from '../../error/WrongPropertyError';
 import ObjectHelper from '../../helpers/ObjectHelper';
@@ -10,7 +14,6 @@ import { MessageCode } from '../../consts/message';
 import {
   ObjectType,
   ObjectWithPropertyTypesStringArray,
-  PropertyClassType,
 } from '../../types/object';
 import { EntityDataStore } from './index';
 import { RelationType } from '../../types/entity-data/relations';
@@ -22,10 +25,7 @@ class Validator {
   private validateOperation: QueryOperation = QueryOperation.Insert;
   private propertyValidationErrors: ObjectWithPropertyTypesStringArray = {};
 
-  constructor(
-    entityClass: PropertyClassType<unknown>,
-    entity: ObjectType = {},
-  ) {
+  constructor(entityClass: EntityDataStoreKey, entity: ObjectType = {}) {
     this.entityData = EntityDataStore.getEntityDataOrThrowError(
       entityClass,
       entity.constructor.name,

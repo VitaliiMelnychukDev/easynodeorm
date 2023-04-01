@@ -1,9 +1,10 @@
-import { ObjectType, PropertyClassType } from '../../types/object';
+import { ObjectType } from '../../types/object';
 import {
-  PreparedColumnsData,
   EntityData,
+  EntityDataStoreKey,
   EntityRelation,
   EntityTableAndColumns,
+  PreparedColumnsData,
   PreparedEntityData,
 } from '../../types/entity-data/entity';
 import { EntityDataStore } from './index';
@@ -14,10 +15,7 @@ class Provider {
   private readonly entity: ObjectType;
   private readonly entityData: EntityData;
 
-  constructor(
-    entityClass: PropertyClassType<unknown>,
-    entity: ObjectType = {},
-  ) {
+  constructor(entityClass: EntityDataStoreKey, entity: ObjectType = {}) {
     this.entityData = EntityDataStore.getEntityDataOrThrowError(
       entityClass,
       entity.constructor.name,
@@ -35,8 +33,6 @@ class Provider {
   getPreparedColumns(columns: string[]): PreparedColumnsData[] {
     return this.prepareColumns(columns);
   }
-
-  getC;
 
   getRelationsData(): Record<string, EntityRelation> {
     return this.entityData.relations;
