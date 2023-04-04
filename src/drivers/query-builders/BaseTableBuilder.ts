@@ -58,7 +58,7 @@ class BaseTableBuilder<AllowedTypes> implements TableBuilder<AllowedTypes> {
     return `${column.name} ${this.getColumnTypePart(
       'ENUM',
       column.length,
-    )} ${QueryBuilderHelper.getEnumValuesQuery(column.enum)})`;
+    )} ${QueryBuilderHelper.getEnumValuesQuery(column.enum)}`;
   }
 
   public getSimpleColumn(column: ColumnProps<AllowedTypes>): string {

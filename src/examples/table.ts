@@ -91,6 +91,9 @@ const tableQueriesExamples = async (): Promise<void> => {
   );
   await postgresDataSource.dataDefinitionQueryManager.dropIndex('users_email');
 
+  await postgresDataSource.dataDefinitionQueryManager.dropTable('products');
+  await postgresDataSource.dataDefinitionQueryManager.dropTable('user_tags');
+  await postgresDataSource.dataDefinitionQueryManager.dropTable('tags');
   await postgresDataSource.dataDefinitionQueryManager.dropTable('users');
   await postgresDataSource.dataDefinitionQueryManager.dropTable('addresses');
 };

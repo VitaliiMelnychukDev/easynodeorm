@@ -73,9 +73,11 @@ abstract class DataDefinitionQueryManager<AllowedTypes> {
     return await this.query(createIndexQuery, Operation.CreateIndex);
   }
 
-  async dropIndex(indexName: string): Promise<unknown> {
-    const dropIndexQuery =
-      this.queryBuilders.indexBuilder.getDropIndexSql(indexName);
+  async dropIndex(indexName: string, tableName?: string): Promise<unknown> {
+    const dropIndexQuery = this.queryBuilders.indexBuilder.getDropIndexSql(
+      indexName,
+      tableName,
+    );
 
     return await this.query(dropIndexQuery, Operation.DropIndex);
   }

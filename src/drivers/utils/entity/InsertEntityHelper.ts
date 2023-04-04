@@ -4,12 +4,11 @@ import {
 } from '../../../types/entity-data/entity';
 import WrongEntityToInsert from '../../../error/WrongEntityToInsert';
 import { ObjectType } from '../../../types/object';
-import { RowsToInsert, WithRelations } from '../../types';
+import { InsertOptions, RowsToInsert, WithRelations } from '../../types';
 import {
   EntityDataManager,
   EntityDataTransformer,
 } from '../../../utils/entity-data';
-import WrongQueryResult from '../../../error/WrongQueryResult';
 import BaseEntityHelper from './BaseEntityHelper';
 import { RelationType } from '../../../types/entity-data/relations';
 
@@ -78,6 +77,7 @@ class InsertEntityHelper extends BaseEntityHelper {
 
     return entityToReturn;
   }
+
   public async handleAndInsertOneToOneRelatedEntity<EntityClass>(
     entity: EntityClass,
     entityRelationFieldName: string,
@@ -196,7 +196,11 @@ class InsertEntityHelper extends BaseEntityHelper {
       });
     }
 
-    await this.insertData(relation.intermediateTable.name, propertiesToInsert);
+    await this.insertData(
+      relation.intermediateTable.name,
+      propertiesToInsert,
+      {},
+    );
   }
 
   public async createEntities<EntityClass>(
@@ -216,9 +220,18 @@ class InsertEntityHelper extends BaseEntityHelper {
       properties.push(insertData.columns);
     });
 
+    const tableAndColumnsData =
+      EntityDataManager.validateAndGetTableAndColumnsData(entityClass);
+    const singlePrimaryKeyFieldName =
+      tableAndColumnsData.primaryColumns.length === 1
+        ? tableAndColumnsData.primaryColumns[0]
+        : '';
     const createdEntries: ObjectType[] = await this.insertData(
       tableName,
       properties,
+      {
+        ...(singlePrimaryKeyFieldName && { singlePrimaryKeyFieldName }),
+      },
     );
 
     return EntityDataTransformer.transformArrayToEntities(
@@ -230,19 +243,9 @@ class InsertEntityHelper extends BaseEntityHelper {
   private async insertData(
     tableName: string,
     rows: RowsToInsert,
+    options: InsertOptions,
   ): Promise<ObjectType[]> {
-    const createdEntries: ObjectType[] = await this.queryManager.insert(
-      tableName,
-      rows,
-    );
-
-    if (!createdEntries.length) {
-      throw new WrongQueryResult(
-        'Something went wrong in process of inserting data',
-      );
-    }
-
-    return createdEntries;
+    return await this.queryManager.insert(tableName, rows, options);
   }
 }
 

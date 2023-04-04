@@ -7,7 +7,6 @@ import {
   EntityDataManager,
   EntityDataTransformer,
 } from '../../../utils/entity-data';
-import WrongQueryResult from '../../../error/WrongQueryResult';
 import { RelationType } from '../../../types/entity-data/relations';
 import { EntityDataStoreKey } from '../../../types/entity-data/entity';
 
@@ -28,7 +27,7 @@ class UpdateEntityHelper extends BaseEntityHelper {
     entity: Entity,
     entityClass: EntityDataStoreKey,
     withRelations: WithRelations<Entity>[] = [],
-  ): Promise<Entity> {
+  ): Promise<Entity | null> {
     const entityData =
       EntityDataManager.validateAndGetTableAndColumnsData(entityClass);
 
@@ -46,11 +45,7 @@ class UpdateEntityHelper extends BaseEntityHelper {
       wherePart,
       true,
     );
-    if (!updatedEntities.length) {
-      throw new WrongQueryResult(
-        'Something went wrong in process of updating data',
-      );
-    }
+
     const updatedEntity = updatedEntities[0];
     const relations = EntityDataManager.validateAndGetRelations(
       entityClass,
@@ -71,15 +66,18 @@ class UpdateEntityHelper extends BaseEntityHelper {
           relation,
           true,
         );
-        await this.selectEntityHelper.populateManyToManyRelation(
-          updatedEntity,
-          relationToHandle,
-          relation,
-        );
+
+        if (updatedEntity) {
+          await this.selectEntityHelper.populateManyToManyRelation(
+            updatedEntity,
+            relationToHandle,
+            relation,
+          );
+        }
       }
     }
 
-    return updatedEntity;
+    return updatedEntity || null;
   }
 
   async update<Entity>(

@@ -1,8 +1,11 @@
 export enum SupportedDatabaseNames {
   Postgres = 'postgres',
+  MySql = 'mysql',
 }
 
-export type SupportedDatabases = SupportedDatabaseNames.Postgres;
+export type SupportedDatabases =
+  | SupportedDatabaseNames.Postgres
+  | SupportedDatabaseNames.MySql;
 
 export type AllowedPropertiesTypes =
   | string

@@ -22,7 +22,8 @@ class BaseIndexBuilder implements IndexBuilder {
     }(${index.tableColumns.join(',')})`;
   }
 
-  getDropIndexSql(indexName: string): string {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getDropIndexSql(indexName: string, tableName?: string): string {
     if (!indexName) {
       throw new WrongIndexQuery(
         'indexName can not be empty in drop index query',

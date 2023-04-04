@@ -1,4 +1,4 @@
-import { RowsToInsert } from '../types/insert';
+import { InsertOptions, RowsToInsert } from '../types/insert';
 import WrongInsertQuery from '../../error/WrongInsertQuery';
 import QueryBuilderHelper from '../helpers/QueryBuilderHelper';
 import { AllowedPropertiesTypes } from '../../types/global';
@@ -54,17 +54,31 @@ class BaseInsertBuilder implements InsertBuilder {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  afterInsertSql(rows: RowsToInsert): string {
+  afterInsertSql(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    tableName: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    rows: RowsToInsert,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    options: InsertOptions,
+  ): string {
     return '';
   }
 
-  getInsertSql(tableName: string, rows: RowsToInsert): string {
+  getInsertSql(
+    tableName: string,
+    rows: RowsToInsert,
+    options: InsertOptions,
+  ): string {
     this.checkProperties(tableName, rows);
 
     return `INSERT INTO ${tableName} ${this.getColumns(
       rows,
-    )} ${this.getRowsSqlWithValues(rows)} ${this.afterInsertSql(rows)}`;
+    )} ${this.getRowsSqlWithValues(rows)} ${this.afterInsertSql(
+      tableName,
+      rows,
+      options,
+    )}`;
   }
 }
 

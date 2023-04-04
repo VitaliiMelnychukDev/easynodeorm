@@ -5,8 +5,10 @@ class DriverLoader {
     switch (dbName) {
       case SupportedDatabaseNames.Postgres:
         return require('pg');
+      case SupportedDatabaseNames.MySql:
+        return require('mysql2/promise');
       default:
-        throw new Error('Only postgres database is supported');
+        throw new Error('Only postgres and mysql databases are supported');
     }
   }
 }

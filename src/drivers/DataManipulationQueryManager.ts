@@ -1,6 +1,6 @@
 import { DataManipulationQueryManagerProps } from './types/queryManager';
 import BaseInsertBuilder from './query-builders/BaseInsertBuilder';
-import { RowsToInsert } from './types/insert';
+import { InsertOptions, RowsToInsert } from './types/insert';
 import { Operation } from './consts/operation';
 import SelectBuilder from './query-builders/BaseSelectBuilder';
 import { Select } from './types/select';
@@ -27,10 +27,15 @@ abstract class DataManipulationQueryManager {
     };
   }
 
-  async insert<T>(tableName: string, rows: RowsToInsert): Promise<T[]> {
+  async insert<T>(
+    tableName: string,
+    rows: RowsToInsert,
+    options: InsertOptions,
+  ): Promise<T[]> {
     const insertQuery = this.queryBuilders.insertBuilder.getInsertSql(
       tableName,
       rows,
+      options,
     );
 
     return await this.query<T>(insertQuery, Operation.Insert);
